@@ -12,15 +12,12 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (name, email, password, role) VALUES
--- Additional users
-INSERT INTO users (name, email, password, role) VALUES
     ('Deepanjali Kumari', 'deepanjali.kumari@iitgn.ac.in', '22110069', 'Visitor'),
     ('Harshita Singh', 'harshita.singh@iitgn.ac.in', '22110140', 'Staff'),
     ('Anushika Mishra', 'anushika.mishra@iitgn.ac.in', '22110029', 'Staff'),
     ('Yash Kokane', 'yash.kokane@iitgn.ac.in', '20110237', 'Admin'),
-    
-    -- Random users
     ('Ajay Verma', 'ajay.verma@gmail.com', '123456', 'patient'),
     ('Meera Nair', 'meera.nair@gmail.com', '123456', 'doctor'),
     ('Siddharth Rao', 'siddharth.rao@gmail.com', '123456', 'admin');
+
 

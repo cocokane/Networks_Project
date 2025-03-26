@@ -1,6 +1,6 @@
 # Database Project
 
-# Dispensary Management System
+# Central Instrumentation Facility (CIF) Inventory Management - IIT Gandhinagar
 
 The given problem statement required team to develop a web application using Flask and MySQL to manage a dispensary. The team is divided into two groups, G1 and G2, with G1 responsible for the front-end and G2 for the back-end. The application should support the dynamic execution of database functions, such as insert, rename, update, delete, (CRUD) and where clause. Additionally, the application should have a login page with user and stakeholder authentication.
 
