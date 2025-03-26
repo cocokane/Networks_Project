@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-theme="emerald">
+
+<head style="height: 100%; width: 100%;">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"> -->
+  <!-- npm i bootstrap-icons -->
+
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      /* background-color: #C9EEFF; */
+    }
+  </style>
+
+  <title>CIF Inventory Management</title>
+  
+
+</head>
+
+<body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
+  <!-- navbar -->
+  <div class="navbar mb-2 fixed w-full z-50 top-0 border-b bg-base-100 text-base-content ">
+    
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <img src="static/logo1.jpeg.jpg" alt="Bootstrap" width="175" height="50">
+      </a>
+    </div>
+    <div class="hidden px-2 mx-2 navbar-center lg:flex">
+      <div class="flex items-stretch">
+        <ul class="menu menu-horizontal">
+          <li>
+          
+            <a href="index" name="start" value="start"  class="ghost-btn rounded-lg">Home</a>
+            <a href="pick_table" class="ghost-btn rounded-lg">Edit</a>
+            <a href="about_us">About Us</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="navbar-end">
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" class="m-1 btn btn-square btn-ghost lg:hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            class="inline-block w-6 h-6 stroke-current">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </div>
+        <ul tabindex="0" class="p-2 shadow menu dropdown-content bg-base-100 rounded-box w-52">
+          <li>
+            <a href="/">Home</a>
+            <a href="pick_table">Edit</a>
+          </li>
+
+        </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  <!-- hero -->
+  <div class="hero min-h-screen bg-base-100" style="background-image: url(static/background.jpg);">
+    <div class="hero-content flex-col lg:flex-row gap-8">
+      
+      <div class="container-fluid" style="text-align: left;">
+        <h1 class="text-5xl font-bold cont" style="font-weight: 2000;">CIF Inventory Management</h1>
+        
+        <p class="py-6" style="color: #191825; font-weight: 750; font-size: medium; line-height: 2;">
+          The Central Instrumentation Facility (CIF) has been established with an objective of providing sophisticated characterization services to the researchers within and outside IIT Gandhinagar. The CIF houses several high-end state-of-the-art instruments. It aims to provide a central facility consisting of the latest and advanced analytical Instruments to facilitate multidisciplinary research and to cater to the needs of academic research institutes, universities, and industries for high-end material characterization.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+          <button name="start" value="start" class="btn btn-secondary">Next</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- footer -->
+  {% include 'footer.html' %}
+
+</body>
+
+</html>

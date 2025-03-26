@@ -1,0 +1,6 @@
+mysql connections details
+
+database: dms
+username: root
+host: 127.0.0.1
+password: justanother_msd

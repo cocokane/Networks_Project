@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-theme="emerald">
+  <head style="height: 100%; width: 100%;">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+
+    <title>CIF Inventory Management</title>
+
+  </head>
+  <body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
+    <!-- navbar -->
+    <div class="navbar mb-2 fixed w-full z-50 top-0 border-b bg-base-100 text-base-content ">
+      
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="static/logo1.jpeg.jpg" alt="Bootstrap" width="175" height="50">
+        </a>
+      </div>
+      <div class="hidden px-2 mx-2 navbar-center lg:flex">
+        <div class="flex items-stretch">
+          <ul class="menu menu-horizontal">
+            <li>
+              <a href="/index" class="ghost-btn rounded-lg">Home</a>
+              <a href="pick_table" class="ghost-btn rounded-lg">Edit</a>
+              <a href="/about_us">About Us</a>
+
+            </li> 
+          </ul>
+        </div>
+      </div> 
+      <div class="navbar-end">
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" class="m-1 btn btn-square btn-ghost lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </div> 
+          <ul tabindex="0" class="p-2 shadow menu dropdown-content bg-base-100 rounded-box w-52">
+            <li>
+              <a href="/" >Home</a>
+              <a href="pick_table" >Edit</a>
+            </li> 
+            
+          </ul>
+        </div>
+      
+      </div>
+  </div>
+
+
+  <!-- hero -->
+  <div class="min-h-screen bg-base-100 p-16 lg:p-32" style="background-image: url(static/bg2.jpg);">
+    
+    <h1 class="font-bold text-3xl pl-4" style="margin-left: 275px;"> Choose table</h1>
+    <div class="hero-content flex-col lg:flex-row-reverse gap-16">
+     
+      <div class="card flex-shrink-0 w-full max-w-sm shadow-xl bg-base-100">
+        <form class="card-body" enctype="multipart/form-data" method="post">
+
+          <div class="form-control">
+            <select name="table" class="select select-bordered w-full max-w-xs" required>
+              {{ options|safe }}
+            </select>
+          </div>
+          <!-- class="card overflow-x-auto w-full overflow-y-auto max-h-96 shadow-xl" -->
+          <!-- select select-bordered w-full max-w-xs -->
+          <div class="form-control mt-2">
+            <div class="flex-row gap-2">
+              <button name="pick" class="btn btn-secondary mr-2" >Chooose</button>
+              <!-- <button name="describe" class="btn btn-secondary btn-outline" >Describe</button> -->
+            </div>
+          </div>
+          
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  {% include 'footer.html' %}
+
+
+
+  </body>
+</html>

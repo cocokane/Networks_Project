@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- bootstrap link  -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+            crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
+
+
+    <!-- font awesome   -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+
+    <title>Dispensary Management System</title>
+
+    <style>
+    /* Styles for the page */
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Merriweather', serif;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ccc;
+    }
+
+    footer {
+      color: #fff;
+      padding: 20px 0;
+    }
+
+    .container-1 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .left,
+    .center,
+    .right {
+      flex: 1;
+      text-align: center;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .right a {
+      color: #fff;
+      margin-left: 10px;
+    }
+
+    .right a:first-child {
+      margin-left: 0;
+    }
+
+    p,h1,
+    h2 {
+      line-height: 2;
+    }
+
+    .ghost-btn {
+      color: black;
+      background-color: transparent;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .ghost-btn:hover {
+      color: white;
+      background-color: #377cfb;
+      border-color: #377cfb;
+    }
+
+
+
+
+    </style>
+</head>
+
+<body style="background-image: url(static/contact.jpg); height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;;">
+
+<!-- navbar -->
+{% include 'nav_bar.html' %}
+<!-- navbar end  -->
+
+
+<div class="container" id="about">
+
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                        aria-controls="panelsStayOpen-collapseOne">
+                    About Us
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <strong>Our database management system is designed to store, manage, and access data
+                        efficiently. With a user-friendly interface and advanced features,
+                        it allows easy record creation, editing, deletion, report generation, and data trend
+                        analysis. Highly customizable, it can be tailored to specific needs.
+                        Our system helps streamline operations for small business owners, researchers,
+                        and students. We offer reliable, secure, and scalable solutions.</strong>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                        aria-controls="panelsStayOpen-collapseTwo">
+                    Our Team
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <!--        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.-->
+                    <div style="width: 50%; margin: auto;">
+<!--                        <h1>Team</h1>-->
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>G1</th>
+                                <th>G2</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td style="vertical-align: middle;">Yash Adhiya</td>
+                                <td style="vertical-align: middle;">Akshat Shrivastava</td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle;">Govardhan Ingale</td>
+                                <td style="vertical-align: middle;">Dhakad Bhagat Singh</td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle;">Aishwarya Omar</td>
+                                <td style="vertical-align: middle;">Mahesh Dange</td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle;">Ronak Hingonia</td>
+                                <td style="vertical-align: middle;">Yash Kokane</td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle;">Ojas Washimkar</td>
+                                <td style="vertical-align: middle;">Shubham Kumar</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+                        aria-controls="panelsStayOpen-collapseThree">
+                    Motivation
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <strong>We believe that data is the foundation of progress and innovation.
+                        Our passion is to create tools that empower individuals and organizations
+                        to unlock their data's full potential. We aim to design cutting-edge
+                        solutions to address modern data challenges and opportunities.
+                        We strive to stay ahead of emerging trends and technologies to provide
+                        easy and accessible database management for everyone. Our mission is
+                        to make database management efficient and intuitive. Join us on our journey
+                        towards a more data-driven world.</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<hr>
+{% include 'footer.html' %}
+
+</body>
+
+</html>

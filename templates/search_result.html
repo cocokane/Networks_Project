@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" data-theme="emerald">
+
+<head style="height: 100%; width: 100%;">
+
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+
+
+    <style>
+    table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-bottom: 1em;
+}
+
+
+
+
+
+
+
+
+
+
+
+    </style>
+
+    <title>Dispensary Management System</title>
+
+</head>
+
+<body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
+
+
+{% include 'nav_bar.html' %}
+
+
+<div class="min-h-screen bg-base-100 p-16 lg:p-32" style="background-image: url(static/bg2.jpg);">
+    <div class="flex-col">
+        <div class="form-control">
+            <div class="flex-row gap-2 pl-4 pb-4 content-start">
+                <form method="post">
+                    <a href="edit" name="edit" class="btn btn-secondary mr-2 gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        Back
+                    </a>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-content flex-col lg:flex-row-reverse gap-16">
+
+        <div class="flex-col w-full">
+            <h1 class="font-bold text-xl p-2">{{ table_name }}</h1>
+            <div class="card overflow-x-auto w-full overflow-y-auto max-h-96 shadow-xl">
+                <table class="table w-full">
+                    {{ table|safe }}
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- footer -->
+{% include 'footer.html' %}
+</body>
+
+</html>

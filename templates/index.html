@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" data-theme="emerald">
+
+<head style="height: 100%; width: 100%;">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <style>
+    .ghost-btn {
+      color: black;
+      background-color: transparent;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .ghost-btn:hover {
+      color: white;
+      background-color: #377cfb;
+      border-color: #377cfb;
+    }
+
+    </style>
+
+    <title>Dispensary Management System</title>
+
+
+</head>
+
+<body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
+
+
+{% include 'nav_bar.html' %}
+
+
+<div class="hero min-h-screen bg-base-100" style="background-image: url(static/background5.jpg);">
+    <div class="hero-content flex-col lg:flex-row gap-8">
+
+        <div class="container-fluid" style="text-align: left;">
+            <h1 class="text-5xl font-bold cont" style="font-weight: 2000; line-height: 1.5;">Dispensary Management
+                System</h1>
+
+            <p class="py-6" style="color: #191825; font-weight: 750; font-size: medium; line-height: 2;">
+                Welcome to our dispensary management system website! We provide an all-in-one solution for dispensary
+                owners to manage their inventory, sales, and customer information. Our user-friendly platform is
+                designed to
+                streamline operations and increase efficiency, while also ensuring compliance with industry regulations.
+                With our system, you can focus on what matters most: providing high-quality products and exceptional
+                customer
+                service.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                <button name="start" value="start" class="btn btn-secondary">Explore</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- footer -->
+{% include 'footer.html' %}
+
+</body>
+
+</html>
