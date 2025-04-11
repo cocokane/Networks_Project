@@ -148,3 +148,22 @@ INSERT INTO Software VALUES
 ('SW008', 'LabVIEW', '2023', 'Perpetual License', 'LV-2023-CTRL-LAB', '2028-12-31', 'V008', 6, 'EE Block, Lab 207'),
 ('SW009', 'TopSpin', '4.1', 'Academic License', 'TS-9876-3210', '2026-05-30', 'V009', 4, 'NMR Spectrometer Setup'),
 ('SW010', 'ChemDraw', '22.0', 'Annual Site License', 'CD-2025-INST', '2026-02-28', 'V010', 15, 'Chemistry Dept Labs');
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL
+);
+
+INSERT INTO users (name, email, password, role) VALUES
+    ('Deepanjali Kumari', 'deepanjali.kumari@iitgn.ac.in', '22110069', 'Visitor'),
+    ('Harshita Singh', 'harshita.singh@iitgn.ac.in', '22110140', 'Staff'),
+    ('Anushika Mishra', 'anushika.mishra@iitgn.ac.in', '22110029', 'Staff'),
+    ('Yash Kokane', 'yash.kokane@iitgn.ac.in', '20110237', 'Admin'),
+    ('Ajay Verma', 'ajay.verma@gmail.com', '123456', 'patient'),
+    ('Meera Nair', 'meera.nair@gmail.com', '123456', 'doctor'),
+    ('Siddharth Rao', 'siddharth.rao@gmail.com', '123456', 'admin');
+
