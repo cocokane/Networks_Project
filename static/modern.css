@@ -1,0 +1,451 @@
+/* Modern styling for CIF Inventory Management */
+
+:root {
+  --primary-color: #005baa;
+  --secondary-color: #0076c2;
+  --accent-color: #26a9e0;
+  --light-color: #f4f9fd;
+  --dark-color: #333333;
+  --gray-color: #f2f2f2;
+  --border-color: #e0e0e0;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--dark-color);
+  background-color: var(--light-color);
+  line-height: 1.6;
+}
+
+/* Modern Card Styling */
+.modern-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modern-card .card-header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 20px;
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.modern-card .card-body {
+  padding: 20px;
+}
+
+/* Button Styling */
+.modern-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  font-size: 0.9rem;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #004a8c;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #006ab0;
+  transform: translateY(-2px);
+}
+
+.btn-accent {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.btn-accent:hover {
+  background-color: #1e8fc4;
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-ghost:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #d32f2f;
+  transform: translateY(-2px);
+}
+
+/* Table Styling */
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.modern-table thead th {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.modern-table tbody tr:nth-child(even) {
+  background-color: var(--gray-color);
+}
+
+.modern-table tbody tr:hover {
+  background-color: #e3f2fd;
+}
+
+.modern-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 91, 170, 0.1);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+/* Select Input */
+.modern-select {
+  appearance: none;
+  width: 100%;
+  padding: 10px 30px 10px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.modern-select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 91, 170, 0.1);
+}
+
+/* Modern Icons for actions */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.icon-button.edit {
+  color: var(--primary-color);
+}
+
+.icon-button.delete {
+  color: var(--danger-color);
+}
+
+.icon-button.view {
+  color: var(--accent-color);
+}
+
+/* Navigation */
+.modern-nav {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modern-nav .brand {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.modern-nav .nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.modern-nav .nav-link {
+  color: var(--dark-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.modern-nav .nav-link:hover {
+  color: var(--primary-color);
+}
+
+.modern-nav .nav-link.active {
+  color: var(--primary-color);
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.hero-section p {
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
+
+/* Modern Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.col {
+  flex: 1;
+  padding: 0 15px;
+}
+
+/* Accordion */
+.modern-accordion {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.modern-accordion-item {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modern-accordion-item:last-child {
+  border-bottom: none;
+}
+
+.modern-accordion-header {
+  padding: 15px 20px;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.modern-accordion-header:hover {
+  background-color: var(--gray-color);
+}
+
+.modern-accordion-body {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.modern-accordion-body.active {
+  padding: 15px 20px;
+  max-height: 1000px;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.pt-40 {
+  padding-top: 40px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.gap-10 {
+  gap: 10px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 992px) {
+  .container {
+    max-width: 100%;
+  }
+  
+  .row {
+    flex-direction: column;
+  }
+  
+  .col {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-nav {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Instrument Grid */
+.instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.instrument-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.instrument-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.instrument-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.instrument-card .card-content {
+  padding: 15px;
+  background-color: white;
+}
+
+.instrument-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+}
+
+.instrument-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+} 

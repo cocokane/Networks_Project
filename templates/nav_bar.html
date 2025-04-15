@@ -1,20 +1,17 @@
-<div class="navbar mb-2 fixed w-full z-50 top-0 border-b bg-base-100 text-base-content" style="background-color: #191825;">
+<nav class="modern-nav">
     <div class="container">
-        <a class="navbar-brand" href="index">
-            <img src="static/logo2.png" alt="Bootstrap" width="70" height="70">
-        </a>
-    </div>
-    <div class="hidden px-2 mx-2 navbar-center lg:flex">
-        <div class="flex items-stretch">
-            <ul class="menu menu-horizontal">
-                <li>
-                    <a href="index" class="ghost-btn rounded-lg" style="background-color: #377cfb; color: #ffffff; margin-right: 10px;">Home</a>
-                    <a href="pick_table" class="ghost-btn rounded-lg" style="background-color: #377cfb; color: #ffffff; margin-right: 10px;">Edit</a>
-                    <a href="/about_us" class="ghost-btn rounded-lg" style="background-color: #377cfb; color: #ffffff; margin-right: 10px;">About Us</a>
-                    <a href="contact_us" class="ghost-btn rounded-lg" style="background-color: #377cfb; color: #ffffff; margin-right: 10px;">Contact Us</a>
-                    <a href="/logout" class="ghost-btn rounded-lg" style="background-color: #377cfb; color: #ffffff;">Logout</a>
-                </li>
-            </ul>
+        <div class="flex justify-between align-center w-full">
+            <a href="index" class="brand flex align-center">
+                <img src="static/logo2.png" alt="CIF Logo" width="80" height="80">
+                <span class="ml-3 hidden md:inline">CIF Inventory Management</span>
+            </a>
+            <div class="nav-links">
+                <a href="index" class="nav-link {% if request.path == '/index' %}active{% endif %}">Home</a>
+                <a href="pick_table" class="nav-link {% if request.path == '/pick_table' %}active{% endif %}">Inventory</a>
+                <a href="about_us" class="nav-link {% if request.path == '/about_us' %}active{% endif %}">About Us</a>
+                <a href="contact_us" class="nav-link {% if request.path == '/contact_us' %}active{% endif %}">Contact</a>
+                <a href="logout" class="modern-btn btn-primary">Logout</a>
+            </div>
         </div>
     </div>
-</div>
+</nav>

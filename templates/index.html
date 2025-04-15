@@ -1,68 +1,197 @@
-<!doctype html>
-<html lang="en" data-theme="emerald">
+{% extends "base.html" %}
 
-<head style="height: 100%; width: 100%;">
+{% block title %}CIF Inventory Management{% endblock %}
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
-    <script src="https://cdn.tailwindcss.com"></script>
-
-
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
-    <style>
-    .ghost-btn {
-      color: black;
-      background-color: transparent;
-      border-radius: 0.25rem;
-      padding: 0.5rem 1rem;
-      transition: all 0.2s ease-in-out;
+{% block extra_css %}
+<style>
+    .hero-image {
+        background-image: linear-gradient(rgba(0, 38, 76, 0.7), rgba(0, 38, 76, 0.7)), url(static/background5.jpg);
+        background-size: cover;
+        background-position: center;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        margin-top: 80px;
     }
-
-    .ghost-btn:hover {
-      color: white;
-      background-color: #377cfb;
-      border-color: #377cfb;
+    
+    .hero-text {
+        text-align: left;
+        color: white;
+        max-width: 700px;
     }
+    
+    .hero-text h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .hero-text p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background-color: var(--primary-color);
+    }
+    
+    .feature-card {
+        text-align: center;
+        padding: 30px 20px;
+    }
+    
+    .feature-card i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+    
+    .stats-section {
+        background-color: var(--primary-color);
+        padding: 60px 0;
+        color: white;
+        text-align: center;
+    }
+    
+    .stat-item h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .btn-explore {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
 
-    </style>
-
-    <title>Dispensary Management System</title>
-
-
-</head>
-
-<body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
-
-
-{% include 'nav_bar.html' %}
-
-
-<div class="hero min-h-screen bg-base-100" style="background-image: url(static/background5.jpg);">
-    <div class="hero-content flex-col lg:flex-row gap-8">
-
-        <div class="container-fluid" style="text-align: left;">
-            <h1 class="text-5xl font-bold cont" style="font-weight: 2000; line-height: 1.5;">CIF Inventory Management
-                </h1>
-
-            <p class="py-6" style="color: #191825; font-weight: 750; font-size: medium; line-height: 2;">
-                Welcome to our CIF Inventory management system website! We provide an all-in-one solution for the Central Instrumentation Facility at IIT Gandhinagar for inventory management. This website can 
-                help CIF administrators to manage their inventory, sales, and customer information. Our user-friendly platform is
-                designed to streamline operations and increase efficiency, while also ensuring compliance with industry regulations.
-            </p>
-
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-image">
+    <div class="container">
+        <div class="hero-text">
+            <h1>CIF Inventory Management</h1>
+            <p>Welcome to our comprehensive inventory management system for the Central Instrumentation Facility at IIT Gandhinagar. Our platform enables efficient tracking of equipment, consumables, and resources, providing real-time insights for better laboratory management.</p>
             <form method="post" enctype="multipart/form-data">
-                <button name="start" value="start" class="btn btn-secondary">Explore</button>
+                <button name="start" value="start" class="modern-btn btn-primary btn-explore">Explore Inventory</button>
             </form>
         </div>
     </div>
-</div>
+</section>
 
+<!-- Categories Section -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <h2 class="section-title">Inventory Categories</h2>
+        <div class="instrument-grid">
+            <div class="instrument-card">
+                <img src="https://iitgn.ac.in/assets/img/instrument_images/bio-afm1.png" alt="Equipment">
+                <div class="card-content">
+                    <h3>Equipment</h3>
+                    <p>Manage laboratory equipment, scientific instruments, and research tools.</p>
+                </div>
+            </div>
+            <div class="instrument-card">
+                <img src="https://iitgn.ac.in/assets/img/instrument_images/ccd1.png" alt="Consumables">
+                <div class="card-content">
+                    <h3>Consumable Inventory</h3>
+                    <p>Track chemicals, reagents, and other consumable laboratory supplies.</p>
+                </div>
+            </div>
+            <div class="instrument-card">
+                <img src="https://iitgn.ac.in/assets/img/instrument_images/dls1.png" alt="Software">
+                <div class="card-content">
+                    <h3>Software</h3>
+                    <p>Manage licenses and installations of scientific and analytical software.</p>
+                </div>
+            </div>
+            <div class="instrument-card">
+                <img src="https://iitgn.ac.in/assets/img/instrument_images/maintenance1.jpg" alt="Maintenance">
+                <div class="card-content">
+                    <h3>Maintenance Visits</h3>
+                    <p>Schedule and track maintenance activities for laboratory equipment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- footer -->
-{% include 'footer.html' %}
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title">Key Features</h2>
+        <div class="row mt-5">
+            <div class="col-md-3">
+                <div class="feature-card">
+                    <i class="fas fa-search"></i>
+                    <h3>Quick Search</h3>
+                    <p>Find equipment and supplies quickly with advanced search options</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Inventory Tracking</h3>
+                    <p>Real-time monitoring of inventory levels and usage patterns</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>User Management</h3>
+                    <p>Role-based access control for administrators, staff, and visitors</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card">
+                    <i class="fas fa-history"></i>
+                    <h3>Maintenance Records</h3>
+                    <p>Track equipment service history and schedule upcoming maintenance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-</body>
-
-</html>
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <h2>40+</h2>
+                    <p>Equipment Items</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <h2>120+</h2>
+                    <p>Consumables</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <h2>15+</h2>
+                    <p>Software Packages</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

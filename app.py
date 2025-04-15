@@ -4,23 +4,36 @@ from sql_tools import *
 from html_tools import *
 import MySQLdb.cursors
 import re
+import os
+import secrets
+import hashlib
 
 import flask
 
 app = Flask(__name__)
-app.debug = True
+# Set debug mode based on environment
+app.debug = os.environ.get('FLASK_ENV') == 'development'
 
-# secret key 
-app.secret_key = 'your_secret_key'
+# Generate a secure secret key or load from environment variable
+app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_hex(16)
 
+# Read database credentials from file
+def get_db_password():
+    try:
+        with open('database_pass.txt', 'r') as f:
+            for line in f:
+                if line.startswith('password:'):
+                    return line.strip().split('password:')[1].strip()
+    except:
+        return None
+    
 # Enter your mysql connection details here
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Sandeep2107*'
+app.config['MYSQL_PASSWORD'] = get_db_password()
 app.config['MYSQL_DB'] = 'cifdb'
 
-# Intialize MySQL
-
+# Initialize MySQL
 mysql = MySQL(app)
 
 
@@ -28,57 +41,45 @@ mysql = MySQL(app)
 @app.route('/', methods=['GET', 'POST'])
 def login():
     msg = ''
-    # authority = 'Visitor'
     if request.method == 'POST' and 'useremail' in request.form and 'password' in request.form and 'authority' in request.form:
-        # if request.method == 'POST' and 'useremail' in request.form and 'password' in request.form:
         useremail = request.form['useremail']
         password = request.form['password']
         authority = request.form['authority']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        session['authority'] = authority
-        if (authority == "Visitor"):
-            cursor.execute('SELECT * FROM users WHERE email = % s AND password = % s AND role=%s',
-                           (useremail, password, "Visitor",))
-            account = cursor.fetchone()
-            if account:
-                session['bool'] = True
-                session['email'] = account['email']  # here, match emails
-                msg = 'Logged in successfully!'
-                flask.flash(msg)
-                return redirect(url_for('index'))
-            else:
-                msg = 'Incorrect username / password/ role !'
-        elif (authority == "Staff"):
-            cursor.execute('SELECT * FROM users WHERE email = % s AND password = % s AND role=%s',
-                           (useremail, password, "Staff",))
-            # cursor.execute(f"SELECT * FROM users WHERE email = '{useremail}' AND password = '{password}' AND role = 'doctor'")
-            account = cursor.fetchone()
-            if account:
-                session['bool'] = True
-                session['email'] = account['email']
-                msg = 'Logged in successfully!'
-                flask.flash(msg)
-                return redirect(url_for('index'))
-            else:
-                msg = 'Incorrect username/password/ role!'
-                flask.flash(msg)
-        elif (authority == "Admin"):
-            cursor.execute('SELECT * FROM users WHERE email = % s AND password = % s AND role=%s',
-                           (useremail, password, "Admin",))
-            # cursor.execute(f"SELECT * FROM users WHERE email = '{useremail}' AND password = '{password}' AND role = 'Admin'")
-            account = cursor.fetchone()
-            if account:
-                session['bool'] = True
-                session['email'] = account['email']
-                msg = 'Logged in successfully!'
-                flask.flash(msg)
-                return redirect(url_for('index'))
-            else:
-                msg = 'Incorrect username/password/ role!'
-                flask.flash(msg)
-        else:
-            msg = 'Incorrect username/password/ role!'
+        
+        # Validate authority is one of the allowed values
+        valid_roles = ["Visitor", "Staff", "Admin"]
+        if authority not in valid_roles:
+            msg = 'Invalid role selected!'
             flask.flash(msg)
+            return render_template('login.html', msg=msg)
+        
+        # Set authority in session
+        session['authority'] = authority
+        
+        # Check credentials - first try with plain password (for backward compatibility)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                      (useremail, password, authority))
+        account = cursor.fetchone()
+        
+        # If not found with plain password, try with hashed password
+        if not account:
+            # Hash the password for comparison
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                         (useremail, hashed_password, authority))
+            account = cursor.fetchone()
+        
+        if account:
+            session['bool'] = True
+            session['email'] = account['email']
+            msg = 'Logged in successfully!'
+            flask.flash(msg)
+            return redirect(url_for('index'))
+        else:
+            msg = 'Incorrect username/password/role!'
+            flask.flash(msg)
+            
     return render_template('login.html', msg=msg)
 
 @app.route('/test_connection')
@@ -108,21 +109,42 @@ def register():
         password = request.form['password']
         email = request.form['email']
         role = request.form['role']
+        
+        # Validate role
+        valid_roles = ["Visitor", "Staff", "Admin"]
+        if role not in valid_roles:
+            msg = 'Invalid role selected!'
+            return render_template('register.html', msg=msg)
+            
+        # Validate password strength
+        if len(password) < 8:
+            msg = 'Password must be at least 8 characters long!'
+            return render_template('register.html', msg=msg)
+        
+        # Hash the password
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE email = % s', (username,))
-        account = cursor.fetchone()  # fetches the first row
-        if account:
-            msg = 'Account already exists !'
-        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-            msg = 'Invalid email address !'
-        elif not re.match(r'[A-Za-z0-9]+', username):
-            msg = 'Username must contain only characters and numbers !'
-        elif not username or not password or not email:
-            msg = 'Please fill out the form !'
-        else:
-            cursor.execute('INSERT INTO users VALUES (NULL, %s, % s, % s, % s)', (username, email, password, role))
-            mysql.connection.commit()
-            msg = 'You have successfully registered!'
+        try:
+            # Check if email already exists
+            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+            account = cursor.fetchone()  # fetches the first row
+            if account:
+                msg = 'Account already exists!'
+            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                msg = 'Invalid email address!'
+            elif not re.match(r'[A-Za-z0-9]+', username):
+                msg = 'Username must contain only characters and numbers!'
+            elif not username or not password or not email:
+                msg = 'Please fill out the form!'
+            else:
+                cursor.execute('INSERT INTO users VALUES (NULL, %s, %s, %s, %s)', 
+                            (username, email, hashed_password, role))
+                mysql.connection.commit()
+                msg = 'You have successfully registered!'
+        except Exception as e:
+            msg = f'Registration error: {str(e)}'
+            
     elif request.method == 'POST':
         msg = 'Please fill out the form!'
     return render_template('register.html', msg=msg)

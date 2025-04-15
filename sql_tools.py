@@ -36,13 +36,13 @@ def convert(raw_out, type):
 
     return res
 
-def col_names(mysql, tablename, db_name="DMS"):
+def col_names(mysql, tablename, db_name="cifdb"):
     '''
     Obtains the names of all columns of the table as a list
 
     mysql: mysql connection object
     tablename: name of the table whose columns we have to find
-    db_name: name of the database to be used ("dms")
+    db_name: name of the database to be used ("cifdb")
 
     Return
     res: Returns a list containing the names of all columns
@@ -65,15 +65,15 @@ def list_to_string(list):
     corr_str = "(" + corr_str + ")"
     return corr_str
 
-def use_database(mysql, db_name='DMS'):
+def use_database(mysql, db_name='cifdb'):
     '''
     Selects database
 
     mysql: mysql connection object
-    db_name: name of the database to be used ("dms")
+    db_name: name of the database to be used ("cifdb")
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("USE %s", db_name)
+    cursor.execute("USE %s", (db_name,))
     cursor.fetchall()
 
 def show_tables(mysql):
@@ -103,7 +103,7 @@ def desc_table(mysql, tablename):
     res: Overview of the table. Dictionaries of the format specified above.
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("DESC " + tablename)
+    cursor.execute("DESC %s", (tablename,))
     res = cursor.fetchall()
     res = convert(res, "desc")
     return res
@@ -118,7 +118,7 @@ def select_with_headers(mysql, tablename):
     res: List of lists, first is list of column names, followed by list of rows in the table
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM " + tablename)
+    cursor.execute("SELECT * FROM %s", (tablename,))
     rows = cursor.fetchall()
     rows = convert(rows, "select")
     res = rows # error prone
@@ -138,9 +138,13 @@ def insert_to_table(mysql, tablename, columnlist, val_list):
     '''
     res1 = select_with_headers(mysql, tablename) # before the operation
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    # Build the query with proper parameterization
     cols_string = list_to_string(columnlist)
-    vals_string = list_to_string(val_list)
-    cursor.execute("INSERT INTO " + tablename + " " + cols_string + " VALUES " + vals_string)
+    placeholders = ', '.join(['%s'] * len(val_list))
+    query = f"INSERT INTO {tablename} {cols_string} VALUES ({placeholders})"
+    
+    cursor.execute(query, val_list)
     mysql.connection.commit()
     cursor.fetchall()
     res2 = select_with_headers(mysql, tablename) # after the operation
@@ -160,13 +164,17 @@ def delete_from_table(mysql, tablename, where_condition):
     '''
     res1 = select_with_headers(mysql, tablename) # before the operation
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("DELETE FROM " + tablename + " WHERE " + where_condition)
+    
+    # Note: where_condition still needs to be prepared by the caller with proper parameter binding
+    query = f"DELETE FROM {tablename} WHERE {where_condition}"
+    cursor.execute(query)
+    
     mysql.connection.commit()
     cursor.fetchall()
     res2 = select_with_headers(mysql, tablename) # after the operation
     return res1, res2
 
-def update_table(mysql, tablename, set_statement,  where_condition):
+def update_table(mysql, tablename, set_statement, where_condition):
     '''
     Updates all rows according to the set statement (satisfying the where condition)
     mysql: mysql connection object
@@ -180,7 +188,11 @@ def update_table(mysql, tablename, set_statement,  where_condition):
     '''
     res1 = select_with_headers(mysql, tablename) # before the operation
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("UPDATE " + tablename +" SET " + set_statement + " WHERE " + where_condition)
+    
+    # Note: set_statement and where_condition still need to be prepared by the caller with proper parameter binding
+    query = f"UPDATE {tablename} SET {set_statement} WHERE {where_condition}"
+    cursor.execute(query)
+    
     mysql.connection.commit()
     cursor.fetchall()
     res2 = select_with_headers(mysql, tablename) # after the operation
