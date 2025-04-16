@@ -57,7 +57,7 @@ def login():
         
         # Admin can be identified by either username or email
         # First try username
-        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+        cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                       (username, password, "Admin"))
         admin_account = cursor.fetchone()
         
@@ -73,7 +73,7 @@ def login():
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
             
             # Try username with hashed password
-            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+            cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                          (username, hashed_password, "Admin"))
             admin_account = cursor.fetchone()
             
@@ -87,7 +87,7 @@ def login():
         if admin_account and authority != "Admin":
             # Admin is logging in as another role
             session['bool'] = True
-            session['username'] = admin_account['username']
+            session['username'] = admin_account['name']
             session['email'] = admin_account['email']
             session['authority'] = authority  # Use the selected role
             msg = 'Logged in successfully as ' + authority + '!'
@@ -95,7 +95,7 @@ def login():
         
         # Regular authentication for non-admin users or admins logging in as admin
         # Try username first
-        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+        cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                       (username, password, authority))
         account = cursor.fetchone()
         
@@ -111,7 +111,7 @@ def login():
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
             
             # Try username with hashed password
-            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+            cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                          (username, hashed_password, authority))
             account = cursor.fetchone()
             
@@ -123,7 +123,7 @@ def login():
         
         if account:
             session['bool'] = True
-            session['username'] = account['username']
+            session['username'] = account['name']
             session['email'] = account['email']
             session['authority'] = authority
             msg = 'Logged in successfully!'

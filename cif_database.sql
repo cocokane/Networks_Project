@@ -167,3 +167,68 @@ INSERT INTO users (name, email, password, role) VALUES
     ('Meera Nair', 'meera.nair@gmail.com', '123456', 'doctor'),
     ('Siddharth Rao', 'siddharth.rao@gmail.com', '123456', 'admin');
 
+
+-- License System Updates
+
+-- Add new fields to Software table for network licensing
+ALTER TABLE Software 
+ADD COLUMN is_network_license BOOLEAN DEFAULT FALSE,
+ADD COLUMN license_server VARCHAR(100),
+ADD COLUMN license_port INT,
+ADD COLUMN license_protocol ENUM('TCP', 'UDP') DEFAULT 'TCP';
+
+-- Create License_Allocations table for tracking license allocations
+CREATE TABLE License_Allocations (
+    allocation_id VARCHAR(10) PRIMARY KEY,
+    software_id VARCHAR(10) NOT NULL,
+    user_id INT NOT NULL,
+    allocation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expiry_date DATETIME,
+    mac_address VARCHAR(20),
+    ip_address VARCHAR(15),
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (software_id) REFERENCES Software(software_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create License_Sessions table for tracking license usage sessions
+CREATE TABLE License_Sessions (
+    session_id VARCHAR(10) PRIMARY KEY,
+    allocation_id VARCHAR(10) NOT NULL,
+    checkout_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    checkin_time DATETIME,
+    client_hostname VARCHAR(100),
+    client_ip VARCHAR(15),
+    heartbeat_last_time DATETIME,
+    session_status ENUM('active', 'closed', 'expired', 'crashed') DEFAULT 'active',
+    FOREIGN KEY (allocation_id) REFERENCES License_Allocations(allocation_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create License_Servers table
+CREATE TABLE License_Servers (
+    server_id VARCHAR(10) PRIMARY KEY,
+    server_name VARCHAR(100) NOT NULL,
+    server_ip VARCHAR(15) NOT NULL,
+    server_port INT NOT NULL,
+    protocol ENUM('TCP', 'UDP') DEFAULT 'TCP',
+    heartbeat_interval INT DEFAULT 60, -- seconds
+    status ENUM('active', 'inactive', 'maintenance') DEFAULT 'active',
+    max_connections INT DEFAULT 100
+);
+
+-- Add CATLAB to software
+INSERT INTO Software VALUES
+('SW013', 'CATLAB', '1.0', 'Academic Floating License', 'CTLB-2024-ABCD-1234', '2025-12-31', 'V003', 10, 'Research Labs', TRUE, '127.0.0.1', 27000, 'TCP');
+
+-- Add license server for CATLAB
+INSERT INTO License_Servers VALUES
+('LS001', 'CATLAB License Server', '127.0.0.1', 27000, 'TCP', 30, 'active', 25);
+
+-- Add some license allocations for testing
+INSERT INTO License_Allocations (allocation_id, software_id, user_id, allocation_date, expiry_date, is_active) VALUES
+('LA001', 'SW013', 4, NOW(), '2025-12-31 23:59:59', TRUE),
+('LA002', 'SW013', 2, NOW(), '2025-12-31 23:59:59', TRUE);
+
