@@ -20,7 +20,7 @@ CREATE TABLE Equipment (
     remarks TEXT
 );
 
-CREATE TABLE Lab_Visits (
+CREATE TABLE LabVisits (
     visit_id VARCHAR(10) PRIMARY KEY,
     visitor_id VARCHAR(10) NOT NULL,
     visitor_name VARCHAR(100) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Lab_Visits (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Maintenance_Visits (
+CREATE TABLE MaintenanceVisits (
     visit_id VARCHAR(10) PRIMARY KEY,
     vendor_id VARCHAR(10),
     equipment_id VARCHAR(10),
@@ -45,7 +45,7 @@ CREATE TABLE Maintenance_Visits (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Consumable_Inventory (
+CREATE TABLE ConsumableInventory (
     item_id VARCHAR(10) PRIMARY KEY,
     item_name VARCHAR(100) NOT NULL,
     quantity_in_stock INT NOT NULL,
@@ -98,7 +98,7 @@ INSERT INTO Equipment VALUES
 ('E010', 'CD Spectrometer', 'Lab 211, Chemistry Block', 2, 'Operational');
 
 -- Lab Visits
-INSERT INTO Lab_Visits VALUES
+INSERT INTO LabVisits VALUES
 ('LV001', 'VST00001', 'Rohan Mehta', 'PhD', '2 hrs', 'E001', '9123456789'),
 ('LV002', 'VST00002', 'Priya Sharma', 'Post Doc', '1.5 hrs', 'E002', '9011223344'),
 ('LV003', 'VST00003', 'Akash Nair', 'MTech', '1 hr', 'E003', '9887766554'),
@@ -111,7 +111,7 @@ INSERT INTO Lab_Visits VALUES
 ('LV010', 'VST00010', 'Tanya Kapoor', 'B.Tech', '1 hr', 'E010', '9022334455');
 
 -- Maintenance Visits
-INSERT INTO Maintenance_Visits VALUES
+INSERT INTO MaintenanceVisits VALUES
 ('MV001', 'V001', 'E001', '2025-03-10 09:00:00', '2025-09-10', 5500.00),
 ('MV002', 'V002', 'E002', '2025-03-12 11:00:00', '2025-10-12', 7200.00),
 ('MV003', 'V003', 'E003', '2025-03-15 14:30:00', '2025-09-15', 4500.00),
@@ -124,7 +124,7 @@ INSERT INTO Maintenance_Visits VALUES
 ('MV010', 'V010', 'E010', '2025-03-28 16:00:00', '2025-09-28', 4300.00);
 
 -- Consumable Inventory
-INSERT INTO Consumable_Inventory VALUES
+INSERT INTO ConsumableInventory VALUES
 ('CI01', 'SEM Sample Holders', 50, 'V001', 250.00, 10),
 ('CI02', 'XRD Slides', 20, 'V002', 180.00, 5),
 ('CI03', 'NMR Tubes', 40, 'V003', 100.00, 15),
@@ -149,8 +149,8 @@ INSERT INTO Software VALUES
 ('SW009', 'TopSpin', '4.1', 'Academic License', 'TS-9876-3210', '2026-05-30', 'V009', 4, 'NMR Spectrometer Setup'),
 ('SW010', 'ChemDraw', '22.0', 'Annual Site License', 'CD-2025-INST', '2026-02-28', 'V010', 15, 'Chemistry Dept Labs');
 
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
+DROP TABLE IF EXISTS Users;
+CREATE TABLE Users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -158,7 +158,7 @@ CREATE TABLE users (
     role VARCHAR(255) NOT NULL
 );
 
-INSERT INTO users (name, email, password, role) VALUES
+INSERT INTO Users (name, email, password, role) VALUES
     ('Deepanjali Kumari', 'deepanjali.kumari@iitgn.ac.in', '22110069', 'Visitor'),
     ('Harshita Singh', 'harshita.singh@iitgn.ac.in', '22110140', 'Staff'),
     ('Anushika Mishra', 'anushika.mishra@iitgn.ac.in', '22110029', 'Staff'),
@@ -166,69 +166,4 @@ INSERT INTO users (name, email, password, role) VALUES
     ('Ajay Verma', 'ajay.verma@gmail.com', '123456', 'patient'),
     ('Meera Nair', 'meera.nair@gmail.com', '123456', 'doctor'),
     ('Siddharth Rao', 'siddharth.rao@gmail.com', '123456', 'admin');
-
-
--- License System Updates
-
--- Add new fields to Software table for network licensing
-ALTER TABLE Software 
-ADD COLUMN is_network_license BOOLEAN DEFAULT FALSE,
-ADD COLUMN license_server VARCHAR(100),
-ADD COLUMN license_port INT,
-ADD COLUMN license_protocol ENUM('TCP', 'UDP') DEFAULT 'TCP';
-
--- Create License_Allocations table for tracking license allocations
-CREATE TABLE License_Allocations (
-    allocation_id VARCHAR(10) PRIMARY KEY,
-    software_id VARCHAR(10) NOT NULL,
-    user_id INT NOT NULL,
-    allocation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expiry_date DATETIME,
-    mac_address VARCHAR(20),
-    ip_address VARCHAR(15),
-    is_active BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (software_id) REFERENCES Software(software_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- Create License_Sessions table for tracking license usage sessions
-CREATE TABLE License_Sessions (
-    session_id VARCHAR(10) PRIMARY KEY,
-    allocation_id VARCHAR(10) NOT NULL,
-    checkout_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    checkin_time DATETIME,
-    client_hostname VARCHAR(100),
-    client_ip VARCHAR(15),
-    heartbeat_last_time DATETIME,
-    session_status ENUM('active', 'closed', 'expired', 'crashed') DEFAULT 'active',
-    FOREIGN KEY (allocation_id) REFERENCES License_Allocations(allocation_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- Create License_Servers table
-CREATE TABLE License_Servers (
-    server_id VARCHAR(10) PRIMARY KEY,
-    server_name VARCHAR(100) NOT NULL,
-    server_ip VARCHAR(15) NOT NULL,
-    server_port INT NOT NULL,
-    protocol ENUM('TCP', 'UDP') DEFAULT 'TCP',
-    heartbeat_interval INT DEFAULT 60, -- seconds
-    status ENUM('active', 'inactive', 'maintenance') DEFAULT 'active',
-    max_connections INT DEFAULT 100
-);
-
--- Add CATLAB to software
-INSERT INTO Software VALUES
-('SW013', 'CATLAB', '1.0', 'Academic Floating License', 'CTLB-2024-ABCD-1234', '2025-12-31', 'V003', 10, 'Research Labs', TRUE, '127.0.0.1', 27000, 'TCP');
-
--- Add license server for CATLAB
-INSERT INTO License_Servers VALUES
-('LS001', 'CATLAB License Server', '127.0.0.1', 27000, 'TCP', 30, 'active', 25);
-
--- Add some license allocations for testing
-INSERT INTO License_Allocations (allocation_id, software_id, user_id, allocation_date, expiry_date, is_active) VALUES
-('LA001', 'SW013', 4, NOW(), '2025-12-31 23:59:59', TRUE),
-('LA002', 'SW013', 2, NOW(), '2025-12-31 23:59:59', TRUE);
 

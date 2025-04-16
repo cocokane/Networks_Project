@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }} | CIF Inventory Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>License Management</h1>
+        
+        <div class="card">
+            <h2>Software License Summary</h2>
+            <div class="search-bar">
+                <input type="text" id="softwareSearch" placeholder="Search software...">
+                <button onclick="clearSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="softwareTable">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Version</th>
+                            <th>Vendor</th>
+                            <th>License Model</th>
+                            <th>Total Seats</th>
+                            <th>Used Seats</th>
+                            <th>Maintenance Expiry</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for software in software_licenses %}
+                        <tr>
+                            <td>{{ software.software_name }}</td>
+                            <td>{{ software.version }}</td>
+                            <td>{{ software.vendor_name }}</td>
+                            <td>{{ software.license_model }}</td>
+                            <td>{{ software.total_seats }}</td>
+                            <td>{{ software.used_seats }}</td>
+                            <td>{{ software.maintenance_expiry }}</td>
+                            <td>
+                                <a href="{{ url_for('software_access', software_id=software.software_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-users"></i> Access
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>License Pools</h2>
+            <div class="search-bar">
+                <input type="text" id="poolSearch" placeholder="Search license pools...">
+                <button onclick="clearPoolSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="poolTable">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Vendor</th>
+                            <th>License Model</th>
+                            <th>Total Seats</th>
+                            <th>Available</th>
+                            <th>License Key</th>
+                            <th>Expiry Date</th>
+                            <th>Maintenance Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pool in license_pools %}
+                        <tr>
+                            <td>{{ pool.software_name }}</td>
+                            <td>{{ pool.vendor_name }}</td>
+                            <td>{{ pool.license_model }}</td>
+                            <td>{{ pool.total_seats }}</td>
+                            <td>{{ pool.available_seats }}</td>
+                            <td>{{ pool.license_key[:8] }}{% if pool.license_key|length > 8 %}...{% endif %}</td>
+                            <td>{{ pool.expiry_date }}</td>
+                            <td>{{ pool.maintenance_expiry }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function clearSearch() {
+            document.getElementById('softwareSearch').value = '';
+            filterSoftware();
+        }
+        
+        function clearPoolSearch() {
+            document.getElementById('poolSearch').value = '';
+            filterPools();
+        }
+        
+        function filterSoftware() {
+            var input = document.getElementById('softwareSearch');
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById('softwareTable');
+            var tr = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < tr.length; i++) {
+                var tdName = tr[i].getElementsByTagName('td')[0];
+                var tdVendor = tr[i].getElementsByTagName('td')[2];
+                var tdModel = tr[i].getElementsByTagName('td')[3];
+                
+                if (tdName || tdVendor || tdModel) {
+                    var txtName = tdName.textContent || tdName.innerText;
+                    var txtVendor = tdVendor.textContent || tdVendor.innerText;
+                    var txtModel = tdModel.textContent || tdModel.innerText;
+                    
+                    if (txtName.toUpperCase().indexOf(filter) > -1 || 
+                        txtVendor.toUpperCase().indexOf(filter) > -1 ||
+                        txtModel.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        function filterPools() {
+            var input = document.getElementById('poolSearch');
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById('poolTable');
+            var tr = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < tr.length; i++) {
+                var tdName = tr[i].getElementsByTagName('td')[0];
+                var tdVendor = tr[i].getElementsByTagName('td')[1];
+                var tdModel = tr[i].getElementsByTagName('td')[2];
+                
+                if (tdName || tdVendor || tdModel) {
+                    var txtName = tdName.textContent || tdName.innerText;
+                    var txtVendor = tdVendor.textContent || tdVendor.innerText;
+                    var txtModel = tdModel.textContent || tdModel.innerText;
+                    
+                    if (txtName.toUpperCase().indexOf(filter) > -1 || 
+                        txtVendor.toUpperCase().indexOf(filter) > -1 ||
+                        txtModel.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        document.getElementById('softwareSearch').addEventListener('keyup', filterSoftware);
+        document.getElementById('poolSearch').addEventListener('keyup', filterPools);
+    </script>
+</body>
+</html> 
