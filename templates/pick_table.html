@@ -1,155 +1,130 @@
-<!doctype html>
-<html lang="en" data-theme="emerald">
+{% extends "base.html" %}
 
-<head style="height: 100%; width: 100%;">
+{% block title %}Select Inventory Table - CIF Inventory Management{% endblock %}
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
-
-    <style>
-    .ghost-btn {
-      color: black;
-      background-color: transparent;
-      border-radius: 0.25rem;
-      padding: 0.5rem 1rem;
-      transition: all 0.2s ease-in-out;
+{% block extra_css %}
+<style>
+    .page-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 60px 0 30px;
+        margin-top: 80px;
+        margin-bottom: 40px;
+        text-align: center;
     }
-
-    .ghost-btn:hover {
-      color: white;
-      background-color: #377cfb;
-      border-color: #377cfb;
+    
+    .page-header h1 {
+        font-size: 2.2rem;
+        font-weight: 600;
     }
+    
+    .table-selection-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--dark-color);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .modern-select {
+        padding: 12px;
+        font-size: 1rem;
+    }
+    
+    .tables-section {
+        margin-top: 40px;
+    }
+    
+    .tables-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
 
-    table {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin-bottom: 1em;
-  border: 2px solid #1d1a1a;
-}
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Select Inventory Table</h1>
+        <p>Choose a table to view, edit, or manage inventory data</p>
+    </div>
+</section>
 
-th,
-td {
-  text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid #1d1a1a;
-  border-right: 1px solid #1d1a1a;
-}
-
-th:first-child,
-td:first-child {
-  border-left: 1px solid #1d1a1a;
-}
-
-th {
-  background-color: #f2f2f2;
-}
-
-@media (max-width: 640px) {
-  table {
-    font-size: 0.8em;
-  }
-}
-
-
-
-
-
-
-
-
-
-    </style>
-
-    <title>CIF Inventory Management</title>
-
-</head>
-
-<body style="height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;">
-
-{% include 'nav_bar.html' %}
-
-
-<div class="min-h-screen bg-base-100 p-16 lg:p-32" style="background-image: url(static/bg2.jpg);">
-    <h1 class="font-bold text-3xl pl-4" style="margin-left: 475px;"> Choose table</h1>
-    <div class="hero-content flex-col lg:flex-row-reverse gap-16">
-        <div class="card flex-shrink-0 w-full max-w-sm shadow-xl bg-base-100">
-            <form class="card-body" enctype="multipart/form-data" method="post">
-
-                {% if operation == 'rename' %}
-                <div class="form-control mt-2">
-                    <div class="flex-row gap-2">
-                        <a href="pick_table" name="pick_table" class="btn btn-secondary mr-2 gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                        Back
-                    </a>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="table-selection-card">
+                <form enctype="multipart/form-data" method="post">
+                    {% if operation == 'rename' %}
+                    <div class="form-group">
+                        <a href="pick_table" class="modern-btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
                     </div>
-                </div>
-                {% endif %}
+                    {% endif %}
 
-                <div class="form-control">
-                    <select name="table" class="select select-bordered w-full max-w-xs" required>
-                        {{ options|safe }}
-                    </select>
-                </div>
-
-                {% if operation == 'rename' %}
-
-                <div class="form-control">
-                    <h1 class="font-bold text-xl p-2">{{ table_name }}</h1>
-
-                    <label class="label">
-                        <span class="label-text">New table name:</span>
-                    </label>
-                    <input type="text" name="new_name" placeholder="None" class="input input-bordered w-full max-w-xs"
-                           required>
-                </div>
-                <div class="form-control mt-2">
-                    <div class="flex-row gap-2">
-                        <button name="rename_execute" class="btn btn-primary">Confirm</button>
+                    <div class="form-group">
+                        <label for="table" class="form-label">Select a table:</label>
+                        <select name="table" id="table" class="form-control modern-select" required>
+                            {{ options|safe }}
+                        </select>
                     </div>
-                </div>
-                {% endif %}
-                {% if operation != 'rename' %}
-                <div class="form-control mt-2">
-                    <div class="flex-row gap-2">
 
-                        <button name="pick" class="btn btn-secondary mr-2">Choose</button>
-                        <button name="rename" class="btn btn-primary">Rename</button>
-
+                    {% if operation == 'rename' %}
+                    <div class="form-group">
+                        <label for="new_name" class="form-label">New table name:</label>
+                        <input type="text" id="new_name" name="new_name" placeholder="Enter new name" class="form-control" required>
                     </div>
+                    <div class="action-buttons">
+                        <button name="rename_execute" class="modern-btn btn-primary">
+                            <i class="fas fa-check"></i> Confirm Rename
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="action-buttons">
+                        <button name="pick" class="modern-btn btn-primary">
+                            <i class="fas fa-table"></i> View Table
+                        </button>
+                        {% if session.authority == 'Admin' %}
+                        <button name="rename" class="modern-btn btn-secondary">
+                            <i class="fas fa-edit"></i> Rename Table
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-7">
+            <div class="tables-section">
+                <h2>Available Tables</h2>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        {{ table|safe }}
+                    </table>
                 </div>
-                {% endif %}
-                <!--                {% if rename %}-->
-
-                <!--                <div class="form-control">-->
-                <!--                    <label class="label">-->
-                <!--                        <span class="label-text">New table name:</span>-->
-                <!--                    </label>-->
-                <!--                    <input type="text" name="new_name" class="input input-bordered w-full max-w-xs" required>-->
-                <!--                </div>-->
-
-                <!--                {% endif %}-->
-            </form>
+            </div>
         </div>
     </div>
 </div>
-
-
-<!-- footer -->
-{% include 'footer.html' %}
-
-
-</body>
-
-</html>
+{% endblock %}

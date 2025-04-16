@@ -78,6 +78,49 @@
         font-size: 1.1rem;
         font-weight: 500;
     }
+    
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+    
+    .card {
+        flex: 1;
+        min-width: 250px;
+        max-width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        background-color: white;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-content {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .card-content h3 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+    
+    .btn-block {
+        display: block;
+        width: 100%;
+    }
+    
+    .mt-2 {
+        margin-top: 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -99,35 +142,33 @@
 <section class="py-5 mt-5">
     <div class="container">
         <h2 class="section-title">Inventory Categories</h2>
-        <div class="instrument-grid">
-            <div class="instrument-card">
-                <img src="https://iitgn.ac.in/assets/img/instrument_images/bio-afm1.png" alt="Equipment">
+        <div class="card-container">
+            <div class="card">
                 <div class="card-content">
                     <h3>Equipment</h3>
-                    <p>Manage laboratory equipment, scientific instruments, and research tools.</p>
+                    <a href="equipment" class="btn btn-primary btn-block mt-2">View Equipment</a>
                 </div>
             </div>
-            <div class="instrument-card">
-                <img src="https://iitgn.ac.in/assets/img/instrument_images/ccd1.png" alt="Consumables">
+            <div class="card">
                 <div class="card-content">
-                    <h3>Consumable Inventory</h3>
-                    <p>Track chemicals, reagents, and other consumable laboratory supplies.</p>
+                    <h3>Consumables</h3>
+                    <a href="consumables" class="btn btn-primary btn-block mt-2">View Consumables</a>
                 </div>
             </div>
-            <div class="instrument-card">
-                <img src="https://iitgn.ac.in/assets/img/instrument_images/dls1.png" alt="Software">
+            <div class="card">
                 <div class="card-content">
                     <h3>Software</h3>
-                    <p>Manage licenses and installations of scientific and analytical software.</p>
+                    <a href="software" class="btn btn-primary btn-block mt-2">View Software</a>
                 </div>
             </div>
-            <div class="instrument-card">
-                <img src="https://iitgn.ac.in/assets/img/instrument_images/maintenance1.jpg" alt="Maintenance">
+            {% if session.authority == 'Admin' or session.authority == 'Staff' %}
+            <div class="card">
                 <div class="card-content">
                     <h3>Maintenance Visits</h3>
-                    <p>Schedule and track maintenance activities for laboratory equipment.</p>
+                    <a href="maintenance" class="btn btn-primary btn-block mt-2">View Maintenance</a>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </section>

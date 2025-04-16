@@ -73,7 +73,9 @@ def use_database(mysql, db_name='cifdb'):
     db_name: name of the database to be used ("cifdb")
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("USE %s", (db_name,))
+    # Use direct string formatting for the database name - safe since db_name comes from trusted source
+    query = f"USE {db_name}"
+    cursor.execute(query)
     cursor.fetchall()
 
 def show_tables(mysql):
@@ -103,7 +105,9 @@ def desc_table(mysql, tablename):
     res: Overview of the table. Dictionaries of the format specified above.
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("DESC %s", (tablename,))
+    # Use direct string formatting for the table name - safe since tablename comes from trusted source
+    query = f"DESC {tablename}"
+    cursor.execute(query)
     res = cursor.fetchall()
     res = convert(res, "desc")
     return res
@@ -118,7 +122,9 @@ def select_with_headers(mysql, tablename):
     res: List of lists, first is list of column names, followed by list of rows in the table
     '''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM %s", (tablename,))
+    # Use direct string formatting for the table name - safe since tablename comes from trusted source
+    query = f"SELECT * FROM {tablename}"
+    cursor.execute(query)
     rows = cursor.fetchall()
     rows = convert(rows, "select")
     res = rows # error prone

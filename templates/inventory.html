@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory - CIF Inventory Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 80px 0 40px;
+        margin-top: 60px;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .inventory-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .toolbar {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .toolbar-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin: 0;
+    }
+    
+    .toolbar-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-toolbar {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        font-weight: 500;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-toolbar i {
+        margin-right: 8px;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background-color: #004a8c;
+    }
+    
+    .search-box {
+        display: flex;
+        margin-bottom: 30px;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-right: none;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .search-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0 20px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .search-btn:hover {
+        background-color: #004a8c;
+    }
+    
+    .inventory-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+    
+    .inventory-table th {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .inventory-table td {
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .inventory-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .inventory-table tr:hover {
+        background-color: rgba(0, 91, 170, 0.05);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-available {
+        background-color: #d1f7dd;
+        color: #0b8a3a;
+    }
+    
+    .status-in-use {
+        background-color: #ffe8d1;
+        color: #b75800;
+    }
+    
+    .status-maintenance {
+        background-color: #ffd1d1;
+        color: #b70000;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        margin-bottom: 50px;
+    }
+    
+    .pagination-item {
+        display: inline-block;
+        padding: 8px 15px;
+        margin: 0 5px;
+        border-radius: 5px;
+        background-color: white;
+        color: var(--text-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .pagination-item:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .pagination-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    
+    .btn-view {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-edit {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Inventory Header -->
+<section class="inventory-header">
+    <div class="container">
+        <h1>Inventory Management</h1>
+        <p>Manage and track all equipment items in the CIF system</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <h2 class="toolbar-title">Equipment Inventory</h2>
+        <div class="toolbar-actions">
+            <a href="{{ url_for('pick_table') }}" class="btn-toolbar btn-primary">
+                <i class="fas fa-plus"></i> Add New Item
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-toolbar btn-primary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+    
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" class="search-input" placeholder="Search equipment by name, ID, or location...">
+        <button class="search-btn">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+    
+    <!-- Inventory Table -->
+    <table class="inventory-table">
+        <thead>
+            <tr>
+                <th>Equipment ID</th>
+                <th>Equipment Name</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td>
+                    <span class="status-badge {% if item[5] == 'Available' %}status-available{% elif item[5] == 'In Use' %}status-in-use{% else %}status-maintenance{% endif %}">
+                        {{ item[5] }}
+                    </span>
+                </td>
+                <td class="action-buttons">
+                    <a href="{{ url_for('view_item', equipment_id=item[0]) }}" class="btn-action btn-view">View</a>
+                    <a href="{{ url_for('edit_item', equipment_id=item[0]) }}" class="btn-action btn-edit">Edit</a>
+                    <a href="{{ url_for('delete_item', equipment_id=item[0]) }}" class="btn-action btn-delete" onclick="return confirm('Are you sure you want to delete this item?')">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+        <a href="#" class="pagination-item"><i class="fas fa-chevron-left"></i></a>
+        <a href="#" class="pagination-item active">1</a>
+        <a href="#" class="pagination-item">2</a>
+        <a href="#" class="pagination-item">3</a>
+        <a href="#" class="pagination-item"><i class="fas fa-chevron-right"></i></a>
+    </div>
+</div>
+{% endblock %} 

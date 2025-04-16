@@ -1,178 +1,234 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Contact Us - CIF Inventory Management{% endblock %}
 
-  <!-- bootstrap link  -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
-    crossorigin="anonymous"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css" />
-
-
-  <!-- font awesome   -->
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
-
-  <title>CIF Inventory Management</title>
-
-  <style>
-    /* Styles for the page */
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Merriweather', serif;
+{% block extra_css %}
+<style>
+    .contact-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 80px 0 40px;
+        margin-top: 60px;
+        text-align: center;
+        margin-bottom: 50px;
     }
-
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 20px;
+    
+    .contact-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
     }
-
-    h1,
-    h2 {
-      text-align: center;
+    
+    .contact-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 40px;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    
+    .contact-info h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--primary-color);
+        position: relative;
     }
-
-    th,
-    td {
-      border: 1px solid black;
-      padding: 10px;
-      text-align: center;
+    
+    .contact-info h2:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary-color);
     }
-
-    th {
-      background-color: #ccc;
+    
+    .contact-form h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--primary-color);
+        position: relative;
     }
-
-    footer {
-      color: #fff;
-      padding: 20px 0;
+    
+    .contact-form h2:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary-color);
     }
-
-    .container-1 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    
+    .contact-info-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 25px;
     }
-
-    .left,
-    .center,
-    .right {
-      flex: 1;
-      text-align: center;
+    
+    .contact-info-item i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-right: 15px;
+        margin-top: 4px;
     }
-
-    .left {
-      text-align: left;
+    
+    .contact-info-item .content h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 5px;
     }
-
-    .right {
-      text-align: right;
+    
+    .contact-info-item .content p {
+        color: #666;
+        line-height: 1.6;
+        margin: 0;
     }
-
-    .right a {
-      color: #fff;
-      margin-left: 10px;
+    
+    .form-group {
+        margin-bottom: 25px;
     }
-
-    .right a:first-child {
-      margin-left: 0;
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
     }
-
-    p,h1,
-    h2 {
-      line-height: 2;
+    
+    .form-control {
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
     }
-
-    .ghost-btn {
-      color: black;
-      background-color: transparent;
-      border-radius: 0.25rem;
-      padding: 0.5rem 1rem;
-      transition: all 0.2s ease-in-out;
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 91, 170, 0.1);
     }
-
-    .ghost-btn:hover {
-      color: white;
-      background-color: #377cfb;
-      border-color: #377cfb;
+    
+    .btn-submit {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
     }
-  </style>
-</head>
+    
+    .btn-submit:hover {
+        background-color: #004a8c;
+    }
+    
+    .map-container {
+        height: 350px;
+        width: 100%;
+        margin-top: 40px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
 
-<body style="background-image: url(static/contact.jpg); height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;;">
+{% block content %}
+<!-- Contact Header -->
+<section class="contact-header">
+    <div class="container">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you. Get in touch with us.</p>
+    </div>
+</section>
 
-  <!-- navbar -->
- {% include 'nav_bar.html' %}
-  <!-- navbar end  -->
-
-<div class="container my-5">
+<div class="container">
     <div class="row">
-        <div class="col-md-6 mx-auto">
-            <h1 class="text-center mb-4">Contact Us</h1>
-            <form>
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" placeholder="Enter your name">
+        <!-- Contact Information -->
+        <div class="col-lg-5">
+            <div class="contact-card contact-info">
+                <h2>Get In Touch</h2>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="content">
+                        <h3>Address</h3>
+                        <p>Central Instrumentation Facility</p>
+                        <p>Indian Institute of Technology Gandhinagar</p>
+                        <p>Palaj, Gandhinagar, Gujarat 382355</p>
+                    </div>
                 </div>
-                <br>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp"
-                           placeholder="Enter email">
-                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
-                        else.</small>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <div class="content">
+                        <h3>Phone</h3>
+                        <p>+91 79 2395 2052</p>
+                    </div>
                 </div>
-                <br>
-                <div class="form-group">
-                    <label for="message">Message</label>
-                    <textarea class="form-control" id="message" rows="5"></textarea>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div class="content">
+                        <h3>Email</h3>
+                        <p>cif@iitgn.ac.in</p>
+                    </div>
                 </div>
-                <br>
-                <button type="submit" class="btn btn-primary btn-lg" onclick="sendEmail(event)">Submit</button>
-            </form>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-clock"></i>
+                    <div class="content">
+                        <h3>Working Hours</h3>
+                        <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
+                        <p>Saturday & Sunday: Closed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Form -->
+        <div class="col-lg-7">
+            <div class="contact-card contact-form">
+                <h2>Send Us A Message</h2>
+                
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name" class="form-label">Your Name</label>
+                                <input type="text" id="name" class="form-control" placeholder="Enter your name">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Your Email</label>
+                                <input type="email" id="email" class="form-control" placeholder="Enter your email">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" id="subject" class="form-control" placeholder="Enter subject">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea id="message" class="form-control" rows="5" placeholder="Enter your message"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
+    
+    <!-- Google Map -->
+    <div class="map-container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3667.4662247096124!2d72.6817525!3d23.2116379!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e8ca8149a241f%3A0x7e76e1b0d9daf373!2sIIT%20Gandhinagar!5e0!3m2!1sen!2sin!4v1702478932201!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
 </div>
-
-<script>
-    function sendEmail(event) {
-        event.preventDefault(); // prevent the form from submitting normally
-
-        // get the user's email address and message
-        const email = document.getElementById("email").value;
-        const message = document.getElementById("message").value;
-
-        // copy the message to the user's clipboard
-        navigator.clipboard.writeText(message)
-            .then(() => {
-                // open the user's default email client with a pre-filled email
-                window.location.href = `mailto:${email}?subject=Contact%20Form%20Submission&body=${message}`;
-            })
-            .catch(error => {
-                console.error(`Failed to copy message: ${error}`);
-            });
-    }
-</script>
-
-
-
-
-
-<!-- footer -->
-{% include 'footer.html' %}
-</body>
-</html>
+{% endblock %}

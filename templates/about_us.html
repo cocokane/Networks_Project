@@ -1,211 +1,161 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}About Us - CIF Inventory Management{% endblock %}
 
-    <!-- bootstrap link  -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
-            crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.12.0/dist/full.css" rel="stylesheet" type="text/css"/>
-
-
-    <!-- font awesome   -->
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
-
-    <title>CIF Inventory Management</title>
-
-    <style>
-    /* Styles for the page */
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Merriweather', serif;
+{% block extra_css %}
+<style>
+    .about-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 80px 0 40px;
+        margin-top: 60px;
+        text-align: center;
     }
-
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 20px;
+    
+    .about-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
     }
-
-    h1,
-    h2 {
-      text-align: center;
+    
+    .about-section {
+        padding: 60px 0;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    
+    .team-section {
+        background-color: var(--light-color);
+        padding: 60px 0;
     }
-
-    th,
-    td {
-      border: 1px solid black;
-      padding: 10px;
-      text-align: center;
+    
+    .section-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 40px;
+        text-align: center;
+        position: relative;
     }
-
-    th {
-      background-color: #ccc;
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background-color: var(--primary-color);
     }
-
-    footer {
-      color: #fff;
-      padding: 20px 0;
+    
+    .team-table {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        border-collapse: collapse;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
     }
-
-    .container-1 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    
+    .team-table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        padding: 15px;
+        text-align: left;
     }
-
-    .left,
-    .center,
-    .right {
-      flex: 1;
-      text-align: center;
+    
+    .team-table tr:nth-child(even) {
+        background-color: #f8f9fa;
     }
-
-    .left {
-      text-align: left;
+    
+    .team-table tr:hover {
+        background-color: #e9ecef;
     }
-
-    .right {
-      text-align: right;
+    
+    .team-table td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
     }
-
-    .right a {
-      color: #fff;
-      margin-left: 10px;
+    
+    .motivation-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
     }
+</style>
+{% endblock %}
 
-    .right a:first-child {
-      margin-left: 0;
-    }
+{% block content %}
+<!-- About Header -->
+<section class="about-header">
+    <div class="container">
+        <h1>About Us</h1>
+        <p>Learn more about our team and project</p>
+    </div>
+</section>
 
-    p,h1,
-    h2 {
-      line-height: 2;
-    }
-
-    .ghost-btn {
-      color: black;
-      background-color: transparent;
-      border-radius: 0.25rem;
-      padding: 0.5rem 1rem;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .ghost-btn:hover {
-      color: white;
-      background-color: #377cfb;
-      border-color: #377cfb;
-    }
-
-
-
-
-    </style>
-</head>
-
-<body style="background-image: url(static/contact.jpg); height: 100%; width: 100%; overflow-x: hidden; font-family: 'Merriweather', serif;;">
-
-<!-- navbar -->
-{% include 'nav_bar.html' %}
-<!-- navbar end  -->
-
-
-<div class="container" id="about">
-
-    <div class="accordion" id="accordionPanelsStayOpenExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
-                        aria-controls="panelsStayOpen-collapseOne">
-                    About Us
-                </button>
-            </h2>
-            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <strong>We're students at IIT Gandhinagar, working on the Networks (CS 331) project. We have rigorously studied the CIF page, taking inspiration from the Tinkerer's Lab website at IITGN as well as other inventory management systems to develop this website. Our goal was to create a comprehensive inventory management solution specifically designed for the Central Instrumentation Facility. We would like to thank Prof. Sameer Kulkarni and the Teaching Assistants for their guidance and support throughout this project's development.</strong>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
-                        aria-controls="panelsStayOpen-collapseTwo">
-                    Our Team
-                </button>
-            </h2>
-            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <!--        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.-->
-                    <div style="width: 50%; margin: auto;">
-<!--                        <h1>Team</h1>-->
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Roll Number</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td style="vertical-align: middle;">Yash Kokane</td>
-                                <td style="vertical-align: middle;">20110237</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: middle;">Deepanjali Kumari</td>
-                                <td style="vertical-align: middle;">22110069</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: middle;">Harshita Singh</td>
-                                <td style="vertical-align: middle;">22110299</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: middle;">Anushika Mishra</td>
-                                <td style="vertical-align: middle;">22110029</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
-                        aria-controls="panelsStayOpen-collapseThree">
-                    Motivation
-                </button>
-            </h2>
-            <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    <strong>We were genuinely interested in learning how a website for inventory management would work in practice, and decided to build our own solution from scratch. This project allowed us to apply our knowledge of database systems, web development, and network programming to create a practical application. The hands-on experience gained through developing this system has deepened our understanding of real-world software development challenges and solutions. We hope this project demonstrates our commitment to creating useful, user-friendly tools that solve practical problems.</strong>
+<!-- About Section -->
+<section class="about-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="motivation-card">
+                    <h2 class="section-title">Our Project</h2>
+                    <p>We're students at IIT Gandhinagar, working on the Networks (CS 331) project. We have rigorously studied the CIF page, taking inspiration from the Tinkerer's Lab website at IITGN as well as other inventory management systems to develop this website. Our goal was to create a comprehensive inventory management solution specifically designed for the Central Instrumentation Facility.</p>
+                    <p class="mt-4">We would like to thank Prof. Sameer Kulkarni and the Teaching Assistants for their guidance and support throughout this project's development.</p>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
+<!-- Team Section -->
+<section class="team-section">
+    <div class="container">
+        <h2 class="section-title">Our Team</h2>
+        <table class="team-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Yash Kokane</td>
+                    <td>20110237</td>
+                </tr>
+                <tr>
+                    <td>Deepanjali Kumari</td>
+                    <td>22110069</td>
+                </tr>
+                <tr>
+                    <td>Harshita Singh</td>
+                    <td>22110299</td>
+                </tr>
+                <tr>
+                    <td>Anushika Mishra</td>
+                    <td>22110029</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
-</div>
-
-<hr>
-{% include 'footer.html' %}
-
-</body>
-
-</html>
+<!-- Motivation Section -->
+<section class="about-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="motivation-card">
+                    <h2 class="section-title">Our Motivation</h2>
+                    <p>We were genuinely interested in learning how a website for inventory management would work in practice, and decided to build our own solution from scratch. This project allowed us to apply our knowledge of database systems, web development, and network programming to create a practical application.</p>
+                    <p class="mt-4">The hands-on experience gained through developing this system has deepened our understanding of real-world software development challenges and solutions. We hope this project demonstrates our commitment to creating useful, user-friendly tools that solve practical problems.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

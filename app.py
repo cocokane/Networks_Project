@@ -41,8 +41,8 @@ mysql = MySQL(app)
 @app.route('/', methods=['GET', 'POST'])
 def login():
     msg = ''
-    if request.method == 'POST' and 'useremail' in request.form and 'password' in request.form and 'authority' in request.form:
-        useremail = request.form['useremail']
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'authority' in request.form:
+        username = request.form['username']
         password = request.form['password']
         authority = request.form['authority']
         
@@ -50,37 +50,88 @@ def login():
         valid_roles = ["Visitor", "Staff", "Admin"]
         if authority not in valid_roles:
             msg = 'Invalid role selected!'
-            flask.flash(msg)
-            return render_template('login.html', msg=msg)
+            return render_template('login.html', error=msg)
         
-        # Set authority in session
-        session['authority'] = authority
-        
-        # Check credentials - first try with plain password (for backward compatibility)
+        # First check if the user is an admin
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
-                      (useremail, password, authority))
+        
+        # Admin can be identified by either username or email
+        # First try username
+        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+                      (username, password, "Admin"))
+        admin_account = cursor.fetchone()
+        
+        # If not found, try email
+        if not admin_account:
+            cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                         (username, password, "Admin"))
+            admin_account = cursor.fetchone()
+        
+        # If still not found, try with hashed password
+        if not admin_account:
+            # Hash the password for comparison
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            
+            # Try username with hashed password
+            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+                         (username, hashed_password, "Admin"))
+            admin_account = cursor.fetchone()
+            
+            # If still not found, try email with hashed password
+            if not admin_account:
+                cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                             (username, hashed_password, "Admin"))
+                admin_account = cursor.fetchone()
+        
+        # If user is an admin, allow them to login as any role
+        if admin_account and authority != "Admin":
+            # Admin is logging in as another role
+            session['bool'] = True
+            session['username'] = admin_account['username']
+            session['email'] = admin_account['email']
+            session['authority'] = authority  # Use the selected role
+            msg = 'Logged in successfully as ' + authority + '!'
+            return redirect(url_for('index'))
+        
+        # Regular authentication for non-admin users or admins logging in as admin
+        # Try username first
+        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+                      (username, password, authority))
         account = cursor.fetchone()
         
-        # If not found with plain password, try with hashed password
+        # If not found, try email
+        if not account:
+            cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                         (username, password, authority))
+            account = cursor.fetchone()
+        
+        # If still not found, try with hashed password
         if not account:
             # Hash the password for comparison
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
-            cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
-                         (useremail, hashed_password, authority))
+            
+            # Try username with hashed password
+            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+                         (username, hashed_password, authority))
             account = cursor.fetchone()
+            
+            # If still not found, try email with hashed password
+            if not account:
+                cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s AND role = %s',
+                             (username, hashed_password, authority))
+                account = cursor.fetchone()
         
         if account:
             session['bool'] = True
+            session['username'] = account['username']
             session['email'] = account['email']
+            session['authority'] = authority
             msg = 'Logged in successfully!'
-            flask.flash(msg)
             return redirect(url_for('index'))
         else:
             msg = 'Incorrect username/password/role!'
-            flask.flash(msg)
             
-    return render_template('login.html', msg=msg)
+    return render_template('login.html', error=msg)
 
 @app.route('/test_connection')
 def test_connection():
@@ -181,74 +232,112 @@ def choose():
 
 @app.route('/pick_table', methods=['POST', 'GET'])
 def pick_table():
+    # Check if user is logged in
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+        
     table_name = ''
     operation = ''
     if session.get('table_name'):
         session.pop('table_name', None)
+        
     authority = session.get('authority')
-    options = ''
+    
+    # Define accessible tables for each role
+    accessible_tables = {
+        'Admin': None,  # None means all tables
+        'Staff': ["Consumable_Inventory", "Equipment", "Software", "Maintenance_Visits"],
+        'Visitor': ["Consumable_Inventory", "Equipment", "Software"]
+    }
+    
+    # Get all available tables
+    tables = show_tables(mysql)
+    
+    # Generate the dropdown options based on role
     if authority == 'Admin':
-        options = nested_list_to_html_select(show_tables(mysql))
-    elif authority == 'Visitor':
+        options = nested_list_to_html_select(tables)
+    else:
+        # Filter tables based on role permissions
+        role_tables = accessible_tables.get(authority, [])
         options = ""
-        tables = show_tables(mysql)
-
         for table in tables:
-            if table[0] in ["Consumable_Inventory", "Equipment", "Software"]:
+            if table[0] in role_tables:
                 options += f"<option value='{table[0]}'>{table[0]}</option>"
-
-    elif authority == 'Staff':
-        options = ""
-        tables = show_tables(mysql)
-
-        for table in tables:
-            if table[0] in ["Consumable_Inventory", "Equipment", "Software", "Maintenance_Visits"]:
-                options += f"<option value='{table[0]}'>{table[0]}</option>"
+                
+    # Handle form submissions
     if request.method == 'POST' and 'table' in request.form:
+        selected_table = request.form['table']
+        
+        # Check if user has permission to access this table
+        if authority != 'Admin' and selected_table not in accessible_tables.get(authority, []):
+            return render_template('error.html', error=f"You do not have permission to access the {selected_table} table")
 
         if 'pick' in request.form:
-            session['table_name'] = request.form['table']
+            session['table_name'] = selected_table
             return redirect(url_for('edit'))
 
         elif 'back' in request.form:
-            render_template('pick_table.html')
+            return render_template('pick_table.html')
 
         elif 'rename' in request.form:
+            # Only Admin can rename tables
+            if authority != 'Admin':
+                return render_template('error.html', error="Only administrators can rename tables")
+                
             operation = 'rename'
             return render_template('pick_table.html', operation=operation, options=options)
 
         elif 'rename_execute' in request.form:
-
+            # Only Admin can rename tables
+            if authority != 'Admin':
+                return render_template('error.html', error="Only administrators can rename tables")
+                
             table = request.form['table']
             new_name = request.form['new_name']
 
-            # Rename table
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
+            try:
+                # Rename table
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
+                mysql.connection.commit()
 
-            mysql.connection.commit()
+                session['table_name'] = new_name
+                return redirect(url_for('edit'))
+            except Exception as e:
+                return render_template('invalid.html', e=str(e))
 
-            session['table_name'] = request.form['new_name']
-            return redirect(url_for('edit'))
-
-    table = nested_list_to_html_table(show_tables(mysql))
-    return render_template('pick_table.html', table=table, table_name=table_name, options=options)
+    # Get the table for display
+    table_html = nested_list_to_html_table(tables)
+    return render_template('pick_table.html', table=table_html, table_name=table_name, options=options, operation=operation)
 
 
 @app.route('/edit', methods=['POST', 'GET'])
 def edit():
-    table_name = session['table_name']
+    # Check if user is logged in
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+        
+    table_name = session.get('table_name')
+    if not table_name:
+        return redirect(url_for('pick_table'))
+        
+    # Check permissions based on role
+    authority = session.get('authority')
+    if authority == 'Visitor' and table_name not in ["Consumable_Inventory", "Equipment", "Software"]:
+        return render_template('error.html', error="You do not have permission to access this table")
+    
+    if authority == 'Staff' and table_name not in ["Consumable_Inventory", "Equipment", "Software", "Maintenance_Visits"]:
+        return render_template('error.html', error="You do not have permission to access this table")
+    
     operation = None
     form_html = ''
     options = nested_list_to_html_select_2(col_names(mysql, table_name))
-    authority = session.get('authority')
     msg = ''
 
+    # Fix permission check logic - the previous condition was incorrect
     if request.method == 'POST' and 'delete_button' in request.form and authority != 'Admin':
         msg = 'Action not permitted!'
-    elif (request.method == 'POST' and 'insert_form' in request.form) or ('insert_execute' in request.form or 'update_execute' in request.form or 'update_button' in request.form) and (authority != 'Admin' or authority != 'Staff'):
-        msg = 'Action not permitted!'
-    elif request.method == 'POST' and 'search_execute' in request.form and (authority != 'Admin' or authority != 'Staff' or authority != 'Visitor'):
+    elif request.method == 'POST' and ('insert_form' in request.form or 'insert_execute' in request.form or 'update_execute' in request.form or 'update_button' in request.form) and authority not in ['Admin', 'Staff']:
         msg = 'Action not permitted!'
 
     if authority == 'Admin':
@@ -361,6 +450,48 @@ def edit():
     return render_template('edit.html', table=table, table_name=table_name, operation=operation, form_html=form_html,
                            msg=msg)
 
+
+# Add routes for direct category access
+@app.route('/equipment')
+def equipment():
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+    
+    # Set the table name in session
+    session['table_name'] = 'Equipment'
+    return redirect(url_for('edit'))
+
+@app.route('/consumables')
+def consumables():
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+    
+    # Set the table name in session
+    session['table_name'] = 'Consumable_Inventory'
+    return redirect(url_for('edit'))
+
+@app.route('/software')
+def software():
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+    
+    # Set the table name in session
+    session['table_name'] = 'Software'
+    return redirect(url_for('edit'))
+
+@app.route('/maintenance')
+def maintenance():
+    if not session.get('bool'):
+        return redirect(url_for('login'))
+    
+    # Only Admin and Staff can access maintenance
+    authority = session.get('authority')
+    if authority not in ['Admin', 'Staff']:
+        return render_template('error.html', error="You do not have permission to access this page")
+    
+    # Set the table name in session
+    session['table_name'] = 'Maintenance_Visits'
+    return redirect(url_for('edit'))
 
 # app run
 

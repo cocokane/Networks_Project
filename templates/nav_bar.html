@@ -1,10 +1,12 @@
 <nav class="modern-nav">
     <div class="container">
-        <div class="flex justify-between align-center w-full">
-            <a href="index" class="brand flex align-center">
-                <img src="static/logo2.png" alt="CIF Logo" width="80" height="80">
-                <span class="ml-3 hidden md:inline">CIF Inventory Management</span>
-            </a>
+        <div class="nav-container">
+            <div class="brand-container">
+                <a href="index" class="brand">
+                    <img src="static/logo2.png" alt="CIF Logo" class="left-logo">
+                </a>
+            </div>
+            
             <div class="nav-links">
                 <a href="index" class="nav-link {% if request.path == '/index' %}active{% endif %}">Home</a>
                 <a href="pick_table" class="nav-link {% if request.path == '/pick_table' %}active{% endif %}">Inventory</a>
@@ -15,3 +17,63 @@
         </div>
     </div>
 </nav>
+
+<style>
+    .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .brand-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    .brand {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    
+    .left-logo {
+        max-height: 60px;
+        width: auto;
+        margin-right: 12px;
+    }
+    
+    .brand-text {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.2;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    @media (max-width: 991px) {
+        .nav-container {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .nav-links {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .brand-container {
+            justify-content: center;
+        }
+    }
+</style>
