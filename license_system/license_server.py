@@ -144,6 +144,19 @@ class LicenseServer:
                 logger.error(f"Software {software_id} not found")
                 return {'status': 'error', 'message': 'Software not found'}
             
+            # Check if user has an existing active session for this software
+            cursor.execute("""
+                SELECT ls.session_id 
+                FROM License_Allocations la
+                JOIN License_Sessions ls ON la.allocation_id = ls.allocation_id
+                WHERE la.user_id = %s AND la.software_id = %s AND ls.session_status = 'active'
+            """, (user_id, software_id))
+            
+            existing_session = cursor.fetchone()
+            if existing_session:
+                logger.warning(f"User {user_id} already has an active session: {existing_session['session_id']}")
+                return {'status': 'error', 'message': 'You already have an active license for this software'}
+            
             # Check if user has allocation
             cursor.execute("""
                 SELECT * FROM License_Allocations 
@@ -158,38 +171,29 @@ class LicenseServer:
                 logger.warning(f"No licenses available for {software_id}, active={software['active_sessions']}, max={software['max_installations']}")
                 return {'status': 'error', 'message': 'No licenses available'}
             
-            # If user doesn't have an allocation, create one
-            allocation_id = None
+            # If user doesn't have an allocation, check registration
             if not allocation:
-                # Generate a shorter allocation ID that fits in VARCHAR(10)
-                # Use 'LA' prefix + last 8 digits of timestamp
-                allocation_id = f"LA{str(int(time.time()))[-8:]}"
-                cursor.execute("""
-                    INSERT INTO License_Allocations 
-                    (allocation_id, software_id, user_id, allocation_date, expiry_date, mac_address, ip_address, is_active)
-                    VALUES (%s, %s, %s, NOW(), %s, %s, %s, TRUE)
-                """, (allocation_id, software_id, user_id, software['license_expiry'], 
-                      mac_address, client_address[0]))
-                conn.commit()
-                logger.info(f"Created new allocation {allocation_id} for user {user_id}")
-            else:
-                allocation_id = allocation['allocation_id']
-                logger.info(f"Using existing allocation {allocation_id} for user {user_id}")
+                logger.warning(f"User {user_id} has no allocation for {software_id}")
+                return {'status': 'error', 'message': 'You need to register for a license in the application first. Please complete license registration.'}
             
             # Create a session
             # Generate a shorter session ID that fits in VARCHAR(10)
             # Use 'LS' prefix + last 8 digits of timestamp
             session_id = f"LS{str(int(time.time()))[-8:]}"
+
+            # Ensure allocation_id fits into VARCHAR(10)
+            safe_allocation_id = allocation['allocation_id'][:10]
+
             cursor.execute("""
                 INSERT INTO License_Sessions
                 (session_id, allocation_id, checkout_time, client_hostname, client_ip, heartbeat_last_time, session_status)
                 VALUES (%s, %s, NOW(), %s, %s, NOW(), 'active')
-            """, (session_id, allocation_id, client_hostname, client_address[0]))
+            """, (session_id, safe_allocation_id, client_hostname, client_address[0]))
             conn.commit()
             
             # Add to active connections
             self.active_connections[session_id] = {
-                'allocation_id': allocation_id,
+                'allocation_id': safe_allocation_id,
                 'last_heartbeat': datetime.now(),
                 'address': client_address
             }
@@ -200,7 +204,7 @@ class LicenseServer:
                 'status': 'success',
                 'message': 'License checked out successfully',
                 'session_id': session_id,
-                'expiry': software['license_expiry'].isoformat() if software['license_expiry'] else None
+                'expiry': allocation['expiry_date'].isoformat() if allocation['expiry_date'] else None
             }
             
         except Exception as e:

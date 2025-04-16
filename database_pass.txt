@@ -1,6 +1,6 @@
 mysql connections details
 
-database: dms
+database: cifdb
 username: root
 host: 127.0.0.1
 password: Sandeep2107*

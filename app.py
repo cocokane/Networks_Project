@@ -83,7 +83,7 @@ def login():
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
             
             # Try username with hashed password
-            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+            cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                          (username, hashed_password, "Admin"))
             admin_account = cursor.fetchone()
             
@@ -106,7 +106,7 @@ def login():
         
         # Regular authentication for non-admin users or admins logging in as admin
         # Try username first
-        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+        cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                       (username, password, authority))
         account = cursor.fetchone()
         
@@ -122,7 +122,7 @@ def login():
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
             
             # Try username with hashed password
-            cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s AND role = %s',
+            cursor.execute('SELECT * FROM users WHERE name = %s AND password = %s AND role = %s',
                          (username, hashed_password, authority))
             account = cursor.fetchone()
             
@@ -245,7 +245,7 @@ def choose():
 @app.route('/pick_table', methods=['POST', 'GET'])
 def pick_table():
     # Check if user is logged in
-    if not session.get('bool'):
+    if not session.get('bool'):     
         return redirect(url_for('login'))
         
     table_name = ''
@@ -255,11 +255,11 @@ def pick_table():
         
     authority = session.get('authority')
     
-    # Define accessible tables for each role
+    # Define accessible tables for each role (case-insensitive matching)
     accessible_tables = {
-        'Admin': None,  # None means all tables
-        'Staff': ["ConsumableInventory", "Equipment", "Software", "MaintenanceVisits"],
-        'Visitor': ["ConsumableInventory", "Equipment", "Software"]
+        'Admin': None,  # None means all tables - Admin has full access
+        'Staff': ["equipment", "lab_visits", "maintenance_visits", "consumable_inventory", "software", "vendors"],  # Staff has view-only access to these tables
+        'Visitor': ["equipment", "consumable_inventory", "software", "maintenance_visits"]
     }
     
     # Get all available tables
@@ -268,12 +268,17 @@ def pick_table():
     # Generate the dropdown options based on role
     if authority == 'Admin':
         options = nested_list_to_html_select(tables)
-    else:
-        # Filter tables based on role permissions
-        role_tables = accessible_tables.get(authority, [])
+    elif authority == 'Staff':
+        # Only show allowed tables for Staff
         options = ""
         for table in tables:
-            if table[0] in role_tables:
+            if table[0].lower() in accessible_tables['Staff']:
+                options += f"<option value='{table[0]}'>{table[0]}</option>"
+    else:  # Visitor
+        # Only show allowed tables for Visitors
+        options = ""
+        for table in tables:
+            if table[0].lower() in accessible_tables['Visitor']:
                 options += f"<option value='{table[0]}'>{table[0]}</option>"
                 
     # Handle form submissions
@@ -281,7 +286,9 @@ def pick_table():
         selected_table = request.form['table']
         
         # Check if user has permission to access this table
-        if authority != 'Admin' and selected_table not in accessible_tables.get(authority, []):
+        if authority == 'Staff' and selected_table.lower() not in accessible_tables['Staff']:
+            return render_template('error.html', error=f"You do not have permission to access the {selected_table} table")
+        elif authority == 'Visitor' and selected_table.lower() not in accessible_tables['Visitor']:
             return render_template('error.html', error=f"You do not have permission to access the {selected_table} table")
 
         if 'pick' in request.form:
@@ -335,10 +342,19 @@ def edit():
         
     # Check permissions based on role
     authority = session.get('authority')
-    if authority == 'Visitor' and table_name not in ["ConsumableInventory", "Equipment", "Software"]:
+    
+    # Define accessible tables for each role (case-insensitive matching)
+    accessible_tables = {
+        'Admin': None,  # None means all tables - Admin has full access
+        'Staff': ["equipment", "lab_visits", "maintenance_visits", "consumable_inventory", "software", "vendors"],  # Staff has view-only access to these tables
+        'Visitor': ["equipment", "consumable_inventory", "software", "maintenance_visits"]
+    }
+    
+    # Check access permissions
+    if authority == 'Visitor' and table_name.lower() not in accessible_tables['Visitor']:
         return render_template('error.html', error="You do not have permission to access this table")
     
-    if authority == 'Staff' and table_name not in ["ConsumableInventory", "Equipment", "Software", "MaintenanceVisits"]:
+    if authority == 'Staff' and table_name.lower() not in accessible_tables['Staff']:
         return render_template('error.html', error="You do not have permission to access this table")
     
     operation = None
@@ -346,12 +362,16 @@ def edit():
     options = nested_list_to_html_select_2(col_names(mysql, table_name))
     msg = ''
 
-    # Fix permission check logic - the previous condition was incorrect
+    # Only Admin can delete records
     if request.method == 'POST' and 'delete_button' in request.form and authority != 'Admin':
-        msg = 'Action not permitted!'
-    elif request.method == 'POST' and ('insert_form' in request.form or 'insert_execute' in request.form or 'update_execute' in request.form or 'update_button' in request.form) and authority not in ['Admin', 'Staff']:
-        msg = 'Action not permitted!'
+        msg = 'Only administrators can delete records!'
+    
+    # Only Admin can insert or update records (Staff now has view-only access)
+    elif request.method == 'POST' and ('insert_form' in request.form or 'insert_execute' in request.form or 
+                                     'update_execute' in request.form or 'update_button' in request.form) and authority != 'Admin':
+        msg = 'You have view-only access to this table!'
 
+    # Admin-only operations (DELETE)
     if authority == 'Admin':
         if request.method == 'POST' and 'delete_button' in request.form:
             values = request.form['delete_button'].split(',')
@@ -368,7 +388,8 @@ def edit():
             except Exception as e:
                 return render_template('invalid.html', e=str(e))
 
-    if authority == 'Admin' or authority == 'Staff':
+    # Admin-only operations (INSERT, UPDATE)
+    if authority == 'Admin':
         if request.method == 'POST' and 'insert_form' in request.form:
             operation = 'insert'
             table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
@@ -429,31 +450,29 @@ def edit():
                 session.pop('update_where', None)
             return render_template('update_results.html', tables=tables, table_name=table_name)
 
-    if authority == 'Admin' or authority == 'Staff' or authority == 'Visitor':
-        if request.method == 'POST' and 'search_form' in request.form:
-            operation = 'search'
-            table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
-            # form_html = get_insert_form(select_with_headers(mysql, table_name)[0])
-            return render_template('edit.html', table=table, table_name=table_name, operation=operation,
-                                   options=options)
-        elif request.method == 'POST' and 'search_execute' in request.form:
-            # table = request.form['table']
-            search_col = request.form['column']
-            search_word = request.form['search_word']
+    # All users can search operations
+    if request.method == 'POST' and 'search_form' in request.form:
+        operation = 'search'
+        table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
+        return render_template('edit.html', table=table, table_name=table_name, operation=operation,
+                               options=options)
+    elif request.method == 'POST' and 'search_execute' in request.form:
+        search_col = request.form['column']
+        search_word = request.form['search_word']
 
-            # search table
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(
-                f"DROP VIEW IF EXISTS Search_Result; CREATE VIEW Search_Result AS SELECT * FROM {table_name} WHERE {search_col} LIKE '%{search_word}%'")
-            result_table = cursor.fetchall()
-            cursor.nextset()
-            mysql.connection.commit()
-            try:
-                table_name = 'Search_Result'
-                table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
-                return render_template('search_result.html', table=table, table_name=table_name)
-            except Exception as e:
-                return render_template('invalid.html', e=str(e))
+        # search table
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            f"DROP VIEW IF EXISTS Search_Result; CREATE VIEW Search_Result AS SELECT * FROM {table_name} WHERE {search_col} LIKE '%{search_word}%'")
+        result_table = cursor.fetchall()
+        cursor.nextset()
+        mysql.connection.commit()
+        try:
+            table_name = 'Search_Result'
+            table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
+            return render_template('search_result.html', table=table, table_name=table_name)
+        except Exception as e:
+            return render_template('invalid.html', e=str(e))
 
     table = nested_list_to_html_table(select_with_headers(mysql, table_name), buttons=True)
     return render_template('edit.html', table=table, table_name=table_name, operation=operation, form_html=form_html,
@@ -462,21 +481,17 @@ def edit():
 
 # Add routes for direct category access
 @app.route('/equipment')
+@login_required
 def equipment():
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-    
     # Set the table name in session
-    session['table_name'] = 'Equipment'
+    session['table_name'] = 'equipment'
     return redirect(url_for('edit'))
 
 @app.route('/consumables')
+@login_required
 def consumables():
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-    
     # Set the table name in session
-    session['table_name'] = 'ConsumableInventory'
+    session['table_name'] = 'consumable_inventory'
     return redirect(url_for('edit'))
 
 @app.route('/software')
@@ -528,25 +543,34 @@ def software_detail():
                           title='Software')
 
 @app.route('/maintenance')
+@login_required
 def maintenance():
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-    
-    # Only Admin and Staff can access maintenance
+    # Check if user has permission to access this page
     authority = session.get('authority')
-    if authority not in ['Admin', 'Staff']:
+    
+    # Define accessible tables for each role (case-insensitive matching)
+    accessible_tables = {
+        'Admin': None,  # None means all tables - Admin has full access
+        'Staff': ["equipment", "lab_visits", "maintenance_visits", "consumable_inventory", "software", "vendors"],  # Staff has view-only access to these tables
+        'Visitor': ["equipment", "consumable_inventory", "software", "maintenance_visits"]
+    }
+    
+    # Check if current user role can access maintenance_visits
+    if authority == 'Visitor' and 'maintenance_visits' not in accessible_tables['Visitor']:
         return render_template('error.html', error="You do not have permission to access this page")
     
     # Set the table name in session
-    session['table_name'] = 'MaintenanceVisits'
+    session['table_name'] = 'maintenance_visits'
     return redirect(url_for('edit'))
 
 # License Management Routes
 @app.route('/licenses')
+@login_required
 def licenses():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
+    # Define who can access this page
+    authority = session.get('authority')
+    if authority not in ['Admin', 'Staff']:
+        return render_template('error.html', error="You do not have permission to access this page")
         
     cursor = mysql.connection.cursor()
     
@@ -579,11 +603,8 @@ def licenses():
                           title='License Management')
 
 @app.route('/license_return')
+@login_required
 def license_return():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-        
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Get all active licenses for the current user
@@ -607,12 +628,11 @@ def license_return():
                         title='License Return')
 
 @app.route('/return_license', methods=['POST'])
+@login_required
 def return_license():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-        
+    # Only Admin can actually perform the return
     if request.method == 'POST':
+        authority = session.get('authority')
         license_id = request.form['license_id']
         return_reason = request.form['return_reason']
         notes = request.form['notes']
@@ -630,88 +650,93 @@ def return_license():
         license_details = cursor.fetchone()
         
         if license_details:
-            # Delete the usage record
-            cursor.execute('DELETE FROM LicenseUsage WHERE id = %s', (license_id,))
-            
-            # Log the return with details
-            details = f"Return reason: {return_reason}. Notes: {notes}. Uninstall confirmed: {confirm_uninstall}"
-            cursor.execute('''
-                INSERT INTO LicenseAudit 
-                (software_id, user_id, action, ip_address, session_id, details)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (license_details['software_id'], 
-                  session['id'], 
-                  'checkin', 
-                  request.remote_addr, 
-                  license_details['session_id'], 
-                  details))
-            
-            # Update available seats
-            cursor.execute('SELECT update_license_available_seats()')
-            
-            mysql.connection.commit()
-            cursor.close()
-            
-            flash('License returned successfully!', 'success')
+            # Only admin can delete records, staff only view
+            if authority == 'Admin':
+                # Delete the usage record
+                cursor.execute('DELETE FROM LicenseUsage WHERE id = %s', (license_id,))
+                
+                # Log the return with details
+                details = f"Return reason: {return_reason}. Notes: {notes}. Uninstall confirmed: {confirm_uninstall}"
+                cursor.execute('''
+                    INSERT INTO LicenseAudit 
+                    (software_id, user_id, action, ip_address, session_id, details)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                ''', (license_details['software_id'], 
+                      session['id'], 
+                      'checkin', 
+                      request.remote_addr, 
+                      license_details['session_id'], 
+                      details))
+                
+                # Update available seats
+                cursor.execute('SELECT update_license_available_seats()')
+                
+                mysql.connection.commit()
+                flash('License returned successfully!', 'success')
+            else:
+                flash('You have view-only access. Contact an administrator to return licenses.', 'warning')
         else:
-            cursor.close()
             flash('Error: License not found or not associated with your account.', 'danger')
         
+        cursor.close()
         return redirect(url_for('license_return'))
 
 @app.route('/renew_license', methods=['POST'])
+@login_required
 def renew_license():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
-        
+    # Only Admin can renew licenses
     if request.method == 'POST':
+        authority = session.get('authority')
         license_id = request.form['license_id']
         duration = int(request.form['duration'])
         reason = request.form['reason']
         
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
-        # Update license expiration by extending the expected_checkin date
-        cursor.execute('''
-            UPDATE LicenseUsage
-            SET expected_checkin = DATE_ADD(COALESCE(expected_checkin, NOW()), INTERVAL %s DAY)
-            WHERE id = %s AND user_id = %s
-        ''', (duration, license_id, session['id']))
-        
-        if cursor.rowcount > 0:
-            # Log the renewal
+        if authority == 'Admin':
+            # Update license expiration by extending the expected_checkin date
             cursor.execute('''
-                SELECT software_id, session_id FROM LicenseUsage WHERE id = %s
-            ''', (license_id,))
-            license_info = cursor.fetchone()
+                UPDATE LicenseUsage
+                SET expected_checkin = DATE_ADD(COALESCE(expected_checkin, NOW()), INTERVAL %s DAY)
+                WHERE id = %s AND user_id = %s
+            ''', (duration, license_id, session['id']))
             
-            if license_info:
+            if cursor.rowcount > 0:
+                # Log the renewal
                 cursor.execute('''
-                    INSERT INTO LicenseAudit 
-                    (software_id, user_id, action, ip_address, session_id, details)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                ''', (license_info['software_id'], 
-                      session['id'], 
-                      'renew', 
-                      request.remote_addr, 
-                      license_info['session_id'], 
-                      f"Renewed for {duration} days. Reason: {reason}"))
-            
-            mysql.connection.commit()
-            cursor.close()
-            flash('License renewed successfully!', 'success')
+                    SELECT software_id, session_id FROM LicenseUsage WHERE id = %s
+                ''', (license_id,))
+                license_info = cursor.fetchone()
+                
+                if license_info:
+                    cursor.execute('''
+                        INSERT INTO LicenseAudit 
+                        (software_id, user_id, action, ip_address, session_id, details)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    ''', (license_info['software_id'], 
+                          session['id'], 
+                          'renew', 
+                          request.remote_addr, 
+                          license_info['session_id'], 
+                          f"Renewed for {duration} days. Reason: {reason}"))
+                
+                mysql.connection.commit()
+                flash('License renewed successfully!', 'success')
+            else:
+                flash('Error: License not found or not associated with your account.', 'danger')
         else:
-            cursor.close()
-            flash('Error: License not found or not associated with your account.', 'danger')
+            flash('You have view-only access. Contact an administrator to renew licenses.', 'warning')
         
+        cursor.close()
         return redirect(url_for('license_return'))
 
 @app.route('/license_usage')
+@login_required
 def license_usage():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
+    # Check permissions - only Admin and Staff can view usage
+    authority = session.get('authority')
+    if authority not in ['Admin', 'Staff']:
+        return render_template('error.html', error="You do not have permission to access this page")
         
     cursor = mysql.connection.cursor()
     
@@ -746,10 +771,12 @@ def license_usage():
                           title='License Usage')
 
 @app.route('/license_rules')
+@login_required
 def license_rules():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
+    # Check permissions - only Admin can manage rules
+    authority = session.get('authority')
+    if authority not in ['Admin', 'Staff']:
+        return render_template('error.html', error="You do not have permission to access this page")
         
     cursor = mysql.connection.cursor()
     
@@ -775,10 +802,13 @@ def license_rules():
                           title='License Rules')
 
 @app.route('/add_license_rule', methods=['POST'])
+@login_required
 def add_license_rule():
-    # Check if user is logged in
-    if not session.get('bool'):
-        return redirect(url_for('login'))
+    # Only Admin can add rules
+    authority = session.get('authority')
+    if authority != 'Admin':
+        flash('You have view-only access. Cannot add license rules.', 'warning')
+        return redirect(url_for('license_rules'))
         
     if request.method == 'POST':
         software_id = request.form['software_id']
@@ -973,6 +1003,12 @@ def remove_software_access(software_id, group_id):
 @app.route('/checkout_license/<string:software_id>')
 @login_required
 def checkout_license(software_id):
+    # Only Admin can check out licenses
+    authority = session.get('authority')
+    if authority != 'Admin':
+        flash('You have view-only access. Contact an administrator to check out licenses.', 'warning')
+        return redirect(url_for('software'))
+        
     cursor = mysql.connection.cursor()
     
     # Check if there are available licenses
@@ -1069,6 +1105,12 @@ def checkout_license(software_id):
 @app.route('/checkin_license/<string:software_id>')
 @login_required
 def checkin_license(software_id):
+    # Only Admin can check in licenses
+    authority = session.get('authority')
+    if authority != 'Admin':
+        flash('You have view-only access. Contact an administrator to check in licenses.', 'warning')
+        return redirect(url_for('software'))
+        
     cursor = mysql.connection.cursor()
     
     # Get the checkout info

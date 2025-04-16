@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS cifdb;
 USE cifdb;
 
 -- Step 2: Create Tables
-CREATE TABLE Vendors (
+CREATE TABLE vendors (
     vendor_id VARCHAR(10) PRIMARY KEY,
     vendor_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -12,7 +12,7 @@ CREATE TABLE Vendors (
     phone VARCHAR(15) NOT NULL
 );
 
-CREATE TABLE Equipment (
+CREATE TABLE equipment (
     equipment_id VARCHAR(10) PRIMARY KEY,
     equipment_name VARCHAR(100) NOT NULL,
     location VARCHAR(100) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE Equipment (
     remarks TEXT
 );
 
-CREATE TABLE LabVisits (
+CREATE TABLE lab_visits (
     visit_id VARCHAR(10) PRIMARY KEY,
     visitor_id VARCHAR(10) NOT NULL,
     visitor_name VARCHAR(100) NOT NULL,
@@ -28,35 +28,36 @@ CREATE TABLE LabVisits (
     visit_duration VARCHAR(20),
     equipment_id VARCHAR(10),
     visitor_contact VARCHAR(15),
-    FOREIGN KEY (equipment_id) REFERENCES Equipment(equipment_id)
+    FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE MaintenanceVisits (
+CREATE TABLE maintenance_visits (
     visit_id VARCHAR(10) PRIMARY KEY,
     vendor_id VARCHAR(10),
     equipment_id VARCHAR(10),
     visit_time DATETIME,
     next_maintenance_date DATE,
     expenditure DECIMAL(10, 2),
-    FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
+    FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (equipment_id) REFERENCES Equipment(equipment_id)
+    FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE ConsumableInventory (
+CREATE TABLE consumable_inventory (
     item_id VARCHAR(10) PRIMARY KEY,
     item_name VARCHAR(100) NOT NULL,
     quantity_in_stock INT NOT NULL,
     vendor_id VARCHAR(10),
     price_per_item DECIMAL(10, 2),
     reorder_level INT,
-    FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
+    FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Software (
+-- Software table with integrated licensing fields
+CREATE TABLE software (
     software_id VARCHAR(10) PRIMARY KEY,
     software_name VARCHAR(100) NOT NULL,
     version VARCHAR(20),
@@ -66,13 +67,66 @@ CREATE TABLE Software (
     vendor_id VARCHAR(10),
     max_installations INT,
     usage_location VARCHAR(100),
-    FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
+    is_network_license BOOLEAN DEFAULT FALSE,
+    license_server VARCHAR(100),
+    license_port INT,
+    license_protocol ENUM('TCP', 'UDP') DEFAULT 'TCP',
+    FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id)
         ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Users table
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL
+);
+
+-- License system tables
+CREATE TABLE license_allocations (
+    allocation_id VARCHAR(10) PRIMARY KEY,
+    software_id VARCHAR(10) NOT NULL,
+    user_id INT NOT NULL,
+    allocation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expiry_date DATETIME,
+    mac_address VARCHAR(20),
+    ip_address VARCHAR(15),
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (software_id) REFERENCES software(software_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE license_sessions (
+    session_id VARCHAR(10) PRIMARY KEY,
+    allocation_id VARCHAR(10) NOT NULL,
+    checkout_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    checkin_time DATETIME,
+    client_hostname VARCHAR(100),
+    client_ip VARCHAR(15),
+    heartbeat_last_time DATETIME,
+    session_status ENUM('active', 'closed', 'expired', 'crashed') DEFAULT 'active',
+    FOREIGN KEY (allocation_id) REFERENCES license_allocations(allocation_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE license_servers (
+    server_id VARCHAR(10) PRIMARY KEY,
+    server_name VARCHAR(100) NOT NULL,
+    server_ip VARCHAR(15) NOT NULL,
+    server_port INT NOT NULL,
+    protocol ENUM('TCP', 'UDP') DEFAULT 'TCP',
+    heartbeat_interval INT DEFAULT 60, -- seconds
+    status ENUM('active', 'inactive', 'maintenance') DEFAULT 'active',
+    max_connections INT DEFAULT 100
 );
 
 -- Step 3: Insert Data
 -- Vendors
-INSERT INTO Vendors VALUES
+INSERT INTO vendors VALUES
 ('V001', 'NanoTech Solutions', 'contact@nanotech.in', '123456789012', 'State Bank of India', '9876543210'),
 ('V002', 'Spectra Instruments', 'info@spectrainst.com', '987654321098', 'Bank of Baroda', '8765432109'),
 ('V003', 'Quantum Equipments', 'sales@quantumeq.com', '456789123456', 'Canara Bank', '8899776655'),
@@ -85,7 +139,7 @@ INSERT INTO Vendors VALUES
 ('V010', 'LabTech Supplies', 'contact@labtechsupplies.in', '112233445566', 'Axis Bank', '9123001122');
 
 -- Equipment
-INSERT INTO Equipment VALUES
+INSERT INTO equipment VALUES
 ('E001', 'FE-SEM', 'Lab 202, Materials Bldg', 1, 'Operational'),
 ('E002', 'XRD', 'Lab 203, Materials Bldg', 1, 'Requires alignment'),
 ('E003', 'Confocal Microscope', 'Lab 204, Bio Block', 2, 'Operational'),
@@ -98,7 +152,7 @@ INSERT INTO Equipment VALUES
 ('E010', 'CD Spectrometer', 'Lab 211, Chemistry Block', 2, 'Operational');
 
 -- Lab Visits
-INSERT INTO LabVisits VALUES
+INSERT INTO lab_visits VALUES
 ('LV001', 'VST00001', 'Rohan Mehta', 'PhD', '2 hrs', 'E001', '9123456789'),
 ('LV002', 'VST00002', 'Priya Sharma', 'Post Doc', '1.5 hrs', 'E002', '9011223344'),
 ('LV003', 'VST00003', 'Akash Nair', 'MTech', '1 hr', 'E003', '9887766554'),
@@ -111,7 +165,7 @@ INSERT INTO LabVisits VALUES
 ('LV010', 'VST00010', 'Tanya Kapoor', 'B.Tech', '1 hr', 'E010', '9022334455');
 
 -- Maintenance Visits
-INSERT INTO MaintenanceVisits VALUES
+INSERT INTO maintenance_visits VALUES
 ('MV001', 'V001', 'E001', '2025-03-10 09:00:00', '2025-09-10', 5500.00),
 ('MV002', 'V002', 'E002', '2025-03-12 11:00:00', '2025-10-12', 7200.00),
 ('MV003', 'V003', 'E003', '2025-03-15 14:30:00', '2025-09-15', 4500.00),
@@ -124,7 +178,7 @@ INSERT INTO MaintenanceVisits VALUES
 ('MV010', 'V010', 'E010', '2025-03-28 16:00:00', '2025-09-28', 4300.00);
 
 -- Consumable Inventory
-INSERT INTO ConsumableInventory VALUES
+INSERT INTO consumable_inventory VALUES
 ('CI01', 'SEM Sample Holders', 50, 'V001', 250.00, 10),
 ('CI02', 'XRD Slides', 20, 'V002', 180.00, 5),
 ('CI03', 'NMR Tubes', 40, 'V003', 100.00, 15),
@@ -136,8 +190,8 @@ INSERT INTO ConsumableInventory VALUES
 ('CI09', 'ToF Matrix Reagents', 18, 'V009', 800.00, 6),
 ('CI10', 'XPS Reference Samples', 22, 'V010', 300.00, 8);
 
--- Software
-INSERT INTO Software VALUES
+-- Software - Standard software entries
+INSERT INTO software (software_id, software_name, version, license_type, license_key, license_expiry, vendor_id, max_installations, usage_location) VALUES
 ('SW001', 'OriginPro', '2023', 'Academic Site License', 'ORG-XYZ-9999-AAAA', '2025-09-30', 'V001', 10, 'Lab PCs (201–210)'),
 ('SW002', 'COMSOL Multiphysics', '6.0', 'Annual Subscription', 'COMSOL-ABCD-1234', '2026-03-31', 'V002', 5, 'HPC Cluster, Lab 210'),
 ('SW003', 'MATLAB', 'R2025a', 'Academic Site License', 'MTLB-2025-XXXX', '2025-12-31', 'V003', 20, 'Institute-Wide'),
@@ -149,21 +203,22 @@ INSERT INTO Software VALUES
 ('SW009', 'TopSpin', '4.1', 'Academic License', 'TS-9876-3210', '2026-05-30', 'V009', 4, 'NMR Spectrometer Setup'),
 ('SW010', 'ChemDraw', '22.0', 'Annual Site License', 'CD-2025-INST', '2026-02-28', 'V010', 15, 'Chemistry Dept Labs');
 
-DROP TABLE IF EXISTS Users;
-CREATE TABLE Users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(255) NOT NULL
-);
+-- Add CATLAB software with network licensing
+INSERT INTO software VALUES
+('SW013', 'CATLAB', '1.0', 'Academic Floating License', 'CTLB-2024-ABCD-1234', '2025-12-31', 'V003', 10, 'Research Labs', TRUE, '127.0.0.1', 27000, 'TCP');
 
-INSERT INTO Users (name, email, password, role) VALUES
-    ('Deepanjali Kumari', 'deepanjali.kumari@iitgn.ac.in', '22110069', 'Visitor'),
-    ('Harshita Singh', 'harshita.singh@iitgn.ac.in', '22110140', 'Staff'),
-    ('Anushika Mishra', 'anushika.mishra@iitgn.ac.in', '22110029', 'Staff'),
-    ('Yash Kokane', 'yash.kokane@iitgn.ac.in', '20110237', 'Admin'),
-    ('Ajay Verma', 'ajay.verma@gmail.com', '123456', 'patient'),
-    ('Meera Nair', 'meera.nair@gmail.com', '123456', 'doctor'),
-    ('Siddharth Rao', 'siddharth.rao@gmail.com', '123456', 'admin');
+-- Users data
+INSERT INTO users (name, email, password, role) VALUES
+-- Insert users with hashed passwords
+(1, 'Deepanjali Kumari', 'deepanjali.kumari@iitgn.ac.in', '6bce79ca301f513f98d5b03405861a00e746d71f8e6d48c1cfa2b098b5cfe515', 'Visitor');
+(2, 'Harshita Singh', 'harshita.singh@iitgn.ac.in', '9bfa8b37c6b8543c2c28734dbe4f2a4690711fcb8e471ad7e5d182117e9e6a96', 'Staff');
+(3, 'Anushika Mishra', 'anushika.mishra@iitgn.ac.in', 'eb36627dc178d5915da18d4d3f95608251941af10828099d7b941ff9831b4d86', 'Staff');
+(4, 'Yash Kokane', 'yash.kokane@iitgn.ac.in', '9a680b5c89931ae5ec1b04a4dec2e6494811382fb378f9c109da4def25cea932', 'Admin');
+(5, 'Ajay Verma', 'ajay.verma@gmail.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Admin');
+(6, 'Meera Nair', 'meera.nair@gmail.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Staff');
+(7, 'Siddharth Rao', 'siddharth.rao@gmail.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Visitor');
 
+
+-- License server setup
+INSERT INTO license_servers VALUES
+('LS001', 'CATLAB License Server', '127.0.0.1', 27000, 'TCP', 30, 'active', 25);
