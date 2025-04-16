@@ -10,6 +10,20 @@
             <div class="nav-links">
                 <a href="index" class="nav-link {% if request.path == '/index' %}active{% endif %}">Home</a>
                 <a href="pick_table" class="nav-link {% if request.path == '/pick_table' %}active{% endif %}">Inventory</a>
+                
+                <!-- License Management Dropdown -->
+                <div class="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle {% if '/license' in request.path %}active{% endif %}">
+                        Licenses <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{{ url_for('licenses') }}" class="dropdown-item">License Dashboard</a>
+                        <a href="{{ url_for('license_return') }}" class="dropdown-item">Return License</a>
+                        <a href="{{ url_for('license_usage') }}" class="dropdown-item">License Usage</a>
+                        <a href="{{ url_for('license_rules') }}" class="dropdown-item">License Rules</a>
+                    </div>
+                </div>
+                
                 <a href="about_us" class="nav-link {% if request.path == '/about_us' %}active{% endif %}">About Us</a>
                 <a href="contact_us" class="nav-link {% if request.path == '/contact_us' %}active{% endif %}">Contact</a>
                 <a href="logout" class="modern-btn btn-primary">Logout</a>
@@ -61,6 +75,48 @@
         color: #666;
     }
     
+    /* Dropdown styles */
+    .dropdown {
+        position: relative;
+    }
+    
+    .dropdown-toggle {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        padding: 0.5rem 0;
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+    
+    .dropdown-item {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: var(--dark-color);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .dropdown-item:hover {
+        background-color: var(--light-color);
+        color: var(--primary-color);
+    }
+    
     @media (max-width: 991px) {
         .nav-container {
             flex-direction: column;
@@ -70,10 +126,43 @@
         .nav-links {
             width: 100%;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .brand-container {
             justify-content: center;
         }
+        
+        .dropdown-menu {
+            position: static;
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+            margin-top: 5px;
+            width: 100%;
+        }
     }
 </style>
+
+<script>
+    // Enable dropdown functionality for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const parent = this.parentElement;
+                const menu = parent.querySelector('.dropdown-menu');
+                
+                // Only needed for mobile
+                if (window.innerWidth <= 991) {
+                    if (menu.style.display === 'block') {
+                        menu.style.display = 'none';
+                    } else {
+                        menu.style.display = 'block';
+                    }
+                }
+            });
+        });
+    });
+</script>

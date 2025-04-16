@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }} | CIF Inventory Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>License Usage</h1>
+        
+        <div class="card">
+            <h2>Current License Usage</h2>
+            <div class="search-bar">
+                <input type="text" id="usageSearch" placeholder="Search by software or user...">
+                <button onclick="clearUsageSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="usageTable">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Version</th>
+                            <th>User</th>
+                            <th>Checkout Time</th>
+                            <th>Machine ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usage in current_usage %}
+                        <tr>
+                            <td>{{ usage.software_name }}</td>
+                            <td>{{ usage.version }}</td>
+                            <td>{{ usage.username }}</td>
+                            <td>{{ usage.checkout_time }}</td>
+                            <td>{{ usage.machine_id }}</td>
+                            <td>
+                                <span class="badge {% if usage.status == 'Active' %}badge-success{% else %}badge-warning{% endif %}">
+                                    {{ usage.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usage.user_id == current_user_id %}
+                                <a href="{{ url_for('checkin_license', software_id=usage.software_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-undo"></i> Check In
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>License Audit History</h2>
+            <div class="search-bar">
+                <input type="text" id="auditSearch" placeholder="Search audit history...">
+                <button onclick="clearAuditSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="auditTable">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Timestamp</th>
+                            <th>Machine ID</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for audit in audit_history %}
+                        <tr>
+                            <td>{{ audit.software_name }}</td>
+                            <td>{{ audit.username }}</td>
+                            <td>{{ audit.action }}</td>
+                            <td>{{ audit.timestamp }}</td>
+                            <td>{{ audit.machine_id }}</td>
+                            <td>{{ audit.duration }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('license_usage', page=page-1) }}" class="btn btn-sm btn-primary">Previous</a>
+                {% endif %}
+                
+                <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                <a href="{{ url_for('license_usage', page=page+1) }}" class="btn btn-sm btn-primary">Next</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function clearUsageSearch() {
+            document.getElementById('usageSearch').value = '';
+            filterUsage();
+        }
+        
+        function clearAuditSearch() {
+            document.getElementById('auditSearch').value = '';
+            filterAudit();
+        }
+        
+        function filterUsage() {
+            var input = document.getElementById('usageSearch');
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById('usageTable');
+            var tr = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < tr.length; i++) {
+                var tdSoftware = tr[i].getElementsByTagName('td')[0];
+                var tdUser = tr[i].getElementsByTagName('td')[2];
+                
+                if (tdSoftware || tdUser) {
+                    var txtSoftware = tdSoftware.textContent || tdSoftware.innerText;
+                    var txtUser = tdUser.textContent || tdUser.innerText;
+                    
+                    if (txtSoftware.toUpperCase().indexOf(filter) > -1 || 
+                        txtUser.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        function filterAudit() {
+            var input = document.getElementById('auditSearch');
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById('auditTable');
+            var tr = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < tr.length; i++) {
+                var tdSoftware = tr[i].getElementsByTagName('td')[0];
+                var tdUser = tr[i].getElementsByTagName('td')[1];
+                var tdAction = tr[i].getElementsByTagName('td')[2];
+                
+                if (tdSoftware || tdUser || tdAction) {
+                    var txtSoftware = tdSoftware.textContent || tdSoftware.innerText;
+                    var txtUser = tdUser.textContent || tdUser.innerText;
+                    var txtAction = tdAction.textContent || tdAction.innerText;
+                    
+                    if (txtSoftware.toUpperCase().indexOf(filter) > -1 || 
+                        txtUser.toUpperCase().indexOf(filter) > -1 ||
+                        txtAction.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        document.getElementById('usageSearch').addEventListener('keyup', filterUsage);
+        document.getElementById('auditSearch').addEventListener('keyup', filterAudit);
+    </script>
+</body>
+</html> 

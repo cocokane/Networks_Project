@@ -1,3 +1,5 @@
+import re
+
 def nested_list_to_html_table(table: list, buttons: bool = False):
     '''
     Converts a nested list to an HTML table with modern styling.
@@ -18,11 +20,12 @@ def nested_list_to_html_table(table: list, buttons: bool = False):
         
     for col in columns:
         html_string += "<th>" + str(col) + "</th>"
-
+    
     html_string += "</tr></thead><tbody>"
-
+    
     for i, row in enumerate(table[1:]):
         html_string += "<tr>"
+        
         if buttons:
             html_string += """<td class="action-cell">
             <form method="post" class="action-buttons">
@@ -41,7 +44,7 @@ def nested_list_to_html_table(table: list, buttons: bool = False):
             html_string += "<td>" + str(cell) + "</td>"
 
         html_string += "</tr>"
-
+    
     html_string += "</tbody>"
 
     return html_string

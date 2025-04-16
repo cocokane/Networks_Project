@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>License Return | CIF Inventory Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <div class="card">
+            <h1>My Active Licenses</h1>
+            
+            <div class="search-bar">
+                <input type="text" id="licenseSearch" placeholder="Search your licenses...">
+                <button onclick="clearSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="licenseTable">
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Version</th>
+                            <th>Checkout Date</th>
+                            <th>Expiration Date</th>
+                            <th>Machine ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for license in active_licenses %}
+                        <tr>
+                            <td>{{ license.software_name }}</td>
+                            <td>{{ license.software_version }}</td>
+                            <td>{{ license.checkout_date }}</td>
+                            <td>{{ license.expiration_date }}</td>
+                            <td>{{ license.machine_id }}</td>
+                            <td>
+                                <span class="status-badge {% if license.days_remaining < 7 %}status-warning{% elif license.days_remaining < 0 %}status-danger{% else %}status-success{% endif %}">
+                                    {% if license.days_remaining < 0 %}
+                                        Expired
+                                    {% elif license.days_remaining < 7 %}
+                                        Expiring Soon ({{ license.days_remaining }} days)
+                                    {% else %}
+                                        Active
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" onclick="openReturnModal('{{ license.id }}', '{{ license.software_name }}', '{{ license.software_version }}')">
+                                    <i class="fas fa-sign-in-alt"></i> Return
+                                </button>
+                                {% if license.days_remaining > 0 %}
+                                <button class="btn btn-secondary" onclick="openRenewModal('{{ license.id }}', '{{ license.software_name }}', '{{ license.software_version }}')">
+                                    <i class="fas fa-sync"></i> Renew
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if not active_licenses %}
+                <div class="empty-state">
+                    <i class="fas fa-info-circle"></i>
+                    <p>You don't have any active licenses checked out.</p>
+                    <a href="{{ url_for('license_checkout') }}" class="btn btn-primary">Check Out New License</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Return Modal -->
+    <div id="returnModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Return License</h2>
+                <span class="close" onclick="closeModal('returnModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="returnForm" action="{{ url_for('return_license') }}" method="POST">
+                    <input type="hidden" id="returnLicenseId" name="license_id">
+                    
+                    <div class="form-group">
+                        <label for="returnSoftwareName">Software:</label>
+                        <input type="text" id="returnSoftwareName" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="returnReason">Reason for return:</label>
+                        <select id="returnReason" name="return_reason">
+                            <option value="no_longer_needed">No longer needed</option>
+                            <option value="project_completed">Project completed</option>
+                            <option value="software_issues">Software issues</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="returnNotes">Notes:</label>
+                        <textarea id="returnNotes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="returnConfirm" name="confirm_uninstall" required>
+                            <span class="checkmark"></span>
+                            I confirm that I have uninstalled this software from the machine.
+                        </label>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('returnModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Return</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Renew Modal -->
+    <div id="renewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Renew License</h2>
+                <span class="close" onclick="closeModal('renewModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="renewForm" action="{{ url_for('renew_license') }}" method="POST">
+                    <input type="hidden" id="renewLicenseId" name="license_id">
+                    
+                    <div class="form-group">
+                        <label for="renewSoftwareName">Software:</label>
+                        <input type="text" id="renewSoftwareName" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="renewDuration">Extension period:</label>
+                        <select id="renewDuration" name="duration">
+                            <option value="30">30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="180">180 days</option>
+                            <option value="365">1 year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="renewReason">Reason for renewal:</label>
+                        <textarea id="renewReason" name="reason" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('renewModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Renewal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Search functionality
+        function clearSearch() {
+            document.getElementById('licenseSearch').value = '';
+            filterTable();
+        }
+        
+        function filterTable() {
+            var input = document.getElementById('licenseSearch');
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById('licenseTable');
+            var tr = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < tr.length; i++) {
+                var tdSoftware = tr[i].getElementsByTagName('td')[0];
+                var tdVersion = tr[i].getElementsByTagName('td')[1];
+                var tdMachine = tr[i].getElementsByTagName('td')[4];
+                
+                if (tdSoftware || tdVersion || tdMachine) {
+                    var txtSoftware = tdSoftware.textContent || tdSoftware.innerText;
+                    var txtVersion = tdVersion.textContent || tdVersion.innerText;
+                    var txtMachine = tdMachine.textContent || tdMachine.innerText;
+                    
+                    if (txtSoftware.toUpperCase().indexOf(filter) > -1 || 
+                        txtVersion.toUpperCase().indexOf(filter) > -1 ||
+                        txtMachine.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        // Modal functionality
+        function openReturnModal(licenseId, softwareName, softwareVersion) {
+            document.getElementById('returnLicenseId').value = licenseId;
+            document.getElementById('returnSoftwareName').value = softwareName + ' ' + softwareVersion;
+            document.getElementById('returnModal').style.display = 'block';
+        }
+        
+        function openRenewModal(licenseId, softwareName, softwareVersion) {
+            document.getElementById('renewLicenseId').value = licenseId;
+            document.getElementById('renewSoftwareName').value = softwareName + ' ' + softwareVersion;
+            document.getElementById('renewModal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'returnModal') {
+                document.getElementById('returnForm').reset();
+            } else if (modalId === 'renewModal') {
+                document.getElementById('renewForm').reset();
+            }
+        }
+        
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('licenseSearch').addEventListener('keyup', filterTable);
+    </script>
+</body>
+</html> 
